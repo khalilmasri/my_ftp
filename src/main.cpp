@@ -30,7 +30,12 @@ int main(int argc, char **argv){
     /* } */
 
     Server server;
-
+    server.run();
+    while (1)
+    {
+        if (server.getNewClient())
+            server.handleClient();
+    }
     return 0;
 }
 
