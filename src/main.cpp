@@ -21,21 +21,8 @@
 
 int main(int argc, char **argv){
 
-    /* try{ */
-    /*     if(argc!=1) */
-    /*         throw(ArgsException()); */
-    /* }catch(ArgsException &err){ */
-    /*     std::cout << err.what() << std::endl; */
-    /*     exit(-1); */
-    /* } */
-
     Server server;
     server.run();
-    while (1)
-    {
-        if (server.getNewClient())
-            server.handleClient();
-    }
     return 0;
 }
 
