@@ -2,9 +2,16 @@
 
 Server::Server(){
     create_server_sock();
+    create_thread_pool();
 }
 
-Server::~Server(){};
+/*
+    thread made at beginning 
+*/
+
+Server::~Server(){
+   
+};
 
 Server& Server::operator = (const Server& rhs){
     (void)rhs;
@@ -25,8 +32,10 @@ int Server::handleClient()  {
             std::cout << "accept Error\n";
             exit(-1);
         }
+        std::cout << "Client Addr = " << client_addr.sin_addr.s_addr << std::endl;
+   
         bytes = read(request_accept, &buff, MAX_TRANSMISSION_LENGTH);
-        std::cout << "Message-> " << buff << std::endl;
+    //    std::cout << "Message-> " << buff << std::endl;
         count++;
         std::cout << count << std::endl;
     }
@@ -47,6 +56,15 @@ void Server::create_server_sock(){
         std::cout << "Failed to bind\n";
         exit(1);
     }
+}
+
+bool Server::create_thread_pool(void)
+{
+    for (int i = 0; i < POOL_SIZE; i++)
+    {
+        this->clients.push_back(Client(i));
+    }
+    this->client_number = POOL_SIZE;
 }
 
 void Server::run(){

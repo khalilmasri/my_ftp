@@ -11,12 +11,14 @@ class Client{
     private:
         int client_ID;
         bool available_c;
+        std::thread thread;
 
     public:
-        Client(){
-            /* std::cout << "here\n"; */
+        Client(int id){
+            std::cout << "client id = " << id << std::endl;
+            this->client_ID = id;
+            this->available_c = true;
         }
-
         void create_client(int serverFD) {
             this->client_ID = -1;
             this->available_c = true;

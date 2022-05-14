@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-
+     #include <fcntl.h>
 #include "includes/system.h"
 static int client_socket;
 
@@ -29,10 +29,17 @@ int getCommandId(char *s)
 
 int sendFileToServ(char *arg)
 {
+    char buff[100001];
     printf("PAS1\n");
     //int fd = open(arg, 'r');
-    int fd = send(client_socket, "ijoj", 5, 0);
-    printf("%d\n", fd);
+    int toRead = open("testFile", O_RDONLY);
+
+    read(toRead, &buff, 10);
+    buff[10] = '\0';
+    printf("%s\n", buff);
+    while (1)
+        send(client_socket, buff, 100000, 0);
+  //  printf("%d\n", fd);
     return (0);
 }
 
@@ -57,7 +64,7 @@ int         connectToServer(char *url)
     char server_res[SERVER_RES_MAX_LENGTH + 1];
     //create the socket
     int readBytes = 0;
-    while(readBytes < 100000){
+    while(readBytes < 4000){
     if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return SOCKET_ALLOCATION_FAILED;
 
@@ -68,7 +75,7 @@ int         connectToServer(char *url)
     int connect_socket = connect(client_socket, (struct sockaddr *) &client, sizeof(client));
     if (connect_socket < 0)
         return CONNECTION_FAILED;
-
+        sleep(1);
         sendFileToServ("SAD");
         readBytes++;
     }
