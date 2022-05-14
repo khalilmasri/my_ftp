@@ -14,7 +14,7 @@ class Client{
 
     public:
         Client(){
-            std::cout << "here\n";
+            /* std::cout << "here\n"; */
         }
 
         void create_client(int serverFD) {
