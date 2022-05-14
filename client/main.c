@@ -1,3 +1,22 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  main.c
+ *
+ *    Description:  
+ *
+ *        Version:  1.0
+ *        Created:  05/11/2022 08:34:25 PM
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  YOUR NAME (), 
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
+#include <stdlib.h>
+
 #include "includes/system.h"
 static int client_socket;
 
@@ -11,7 +30,7 @@ int getCommandId(char *s)
 int sendFileToServ(char *arg)
 {
     printf("PAS1\n");
-    //int fd = open(arg, 'r'); 
+    //int fd = open(arg, 'r');
     int fd = send(client_socket, "ijoj", 5, 0);
     printf("%d\n", fd);
     return (0);
@@ -37,6 +56,8 @@ int         connectToServer(char *url)
 
     char server_res[SERVER_RES_MAX_LENGTH + 1];
     //create the socket
+    int readBytes = 0;
+    while(readBytes < 100000){
     if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return SOCKET_ALLOCATION_FAILED;
 
@@ -47,17 +68,19 @@ int         connectToServer(char *url)
     int connect_socket = connect(client_socket, (struct sockaddr *) &client, sizeof(client));
     if (connect_socket < 0)
         return CONNECTION_FAILED;
-    int readBytes;
 
-
-    while ((readBytes = read(1, server_res, SERVER_RES_MAX_LENGTH - 1)) > 0)
-    {
-        server_res[SERVER_RES_MAX_LENGTH] = '\0';
-
-        printf("%s\n", server_res);
-        analyse_buffer(strdup(server_res));
+        sendFileToServ("SAD");
+        readBytes++;
     }
-  
+
+    /* while ((readBytes = read(1, server_res, SERVER_RES_MAX_LENGTH - 1)) > 0) */
+    /* { */
+    /*     server_res[SERVER_RES_MAX_LENGTH] = '\0'; */
+
+    /*     /1* printf("%s\n", server_res); *1/ */
+    /*     /1* analyse_buffer(strdup(server_res)); *1/ */
+    /* } */
+
     return (0);
 }
 
