@@ -20,5 +20,11 @@
 */
 
 need to be defined:
-    need to staty connected?
-    command sent before connection? 
+    need to staty connected? (no)
+    command sent before connection?  -> send connection and directly execute the command
+
+    /*
+        associate thread to client
+        take order
+        leave connection
+    */

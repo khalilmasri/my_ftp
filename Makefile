@@ -16,7 +16,7 @@ $(TARGET): $(OBJS)
 	$(CC) -o $(TARGET) $(OBJS) $(CFLAGS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
-	${CC} ${CFLAGS} -c $< -o $@
+	${CC} ${CFLAGS} -I include -c $< -o $@
 
 clean:
 	$(RM) $(OBJ)/*.o 

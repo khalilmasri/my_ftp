@@ -1,8 +1,8 @@
 #include "../include/server.hpp"
+#include "threadPool.hpp"
 
 Server::Server(){
     create_server_sock();
-    create_thread_pool();
 }
 
 /*
@@ -33,7 +33,7 @@ int Server::handleClient()  {
             exit(-1);
         }
         std::cout << "Client Addr = " << client_addr.sin_addr.s_addr << std::endl;
-   
+    
         bytes = read(request_accept, &buff, MAX_TRANSMISSION_LENGTH);
     //    std::cout << "Message-> " << buff << std::endl;
         count++;
@@ -69,11 +69,12 @@ bool Server::create_thread_pool(void)
 
 void Server::run(){
 
-    if (listen(this->server_sock, 5) < 0)
+    if (listen(this->server_sock, MAX_THREAD_NUMBER) < 0)
     {
-        std::cout << "listen failed\n";
+        std::cout << "Try again later\n";
         exit (-1);
     }
-    handleClient();
+    ThreadPool ThreadPool();
+    //handleClient();
 }
 

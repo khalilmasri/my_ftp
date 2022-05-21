@@ -15,7 +15,7 @@
 #define POOL_SIZE 5
 #define SERVER_PORT 8080
 #define MAX_TRANSMISSION_LENGTH 100000
-
+#define MAX_THREAD_NUMBER 256
 
 #define ERROR_SOCKET -3
 class Server{
