@@ -2,7 +2,7 @@ SRC=src
 OBJ=obj
 BIN=bin
 
-CFLAGS += -Wfatal-errors -w -pthread
+CFLAGS += -Wfatal-errors -w -pthread -I include
 CC=clang++ -std=c++11
 TARGET=ftp
 RM=rm -rf
