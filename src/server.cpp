@@ -1,5 +1,5 @@
 #include "../include/server.hpp"
-#include "threadPool.hpp"
+#include "../include/threadPool.hpp"
 
 Server::Server(){
     create_server_sock();
@@ -65,6 +65,8 @@ bool Server::create_thread_pool(void)
         this->clients.push_back(Client(i));
     }
     this->client_number = POOL_SIZE;
+
+    return true;
 }
 
 void Server::run(){
@@ -74,7 +76,7 @@ void Server::run(){
         std::cout << "Try again later\n";
         exit (-1);
     }
-    ThreadPool ThreadPool();
+    ThreadPool ThreadPool(this->server_sock);
     //handleClient();
 }
 
