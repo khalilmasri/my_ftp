@@ -41,6 +41,10 @@ int Server::handleClient()  {
     }
 }
 
+int Server::getServerSockID() {
+    return this->server_sock;
+}
+
 void Server::create_server_sock(){
     if ((this->server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -58,16 +62,16 @@ void Server::create_server_sock(){
     }
 }
 
-bool Server::create_thread_pool(void)
-{
-    for (int i = 0; i < POOL_SIZE; i++)
-    {
-        this->clients.push_back(Client(i));
-    }
-    this->client_number = POOL_SIZE;
+// bool Server::create_thread_pool(void)
+// {
+//     for (int i = 0; i < POOL_SIZE; i++)
+//     {
+//         this->clients.push_back(Client(i));
+//     }
+//     this->client_number = POOL_SIZE;
 
-    return true;
-}
+//     return true;
+// }
 
 void Server::run(){
 
@@ -76,7 +80,7 @@ void Server::run(){
         std::cout << "Try again later\n";
         exit (-1);
     }
-    ThreadPool ThreadPool(this->server_sock);
-    //handleClient();
+ 
+        //handleClient();
 }
 
