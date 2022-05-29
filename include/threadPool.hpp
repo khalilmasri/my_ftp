@@ -8,26 +8,27 @@
 #include <functional>
 #include <condition_variable>
 
+
 class ThreadPool {
-    public:
-        ThreadPool();
-        ThreadPool(const int);
-        ~ThreadPool();
-        
-        void Start();
-        void QueueJob(const std::function<void()>& job);
-        void Stop();
-        bool busy();
-        void ThreadLoop();
+public:
+    void Start();
+    void QueueJob(const std::function<void(int)>& job);
+    void Stop();
+    bool busy();
+    void MainThread();
+    void exit_listener();
+    bool getExit();
 
-    private:
+private:
+    void ThreadLoop();
 
-        int server_sock;
-        bool should_terminate = false;           // Tells threads to stop looking for jobs
-        std::mutex queue_mutex;                  // Prevents data races to the job queue
-        std::condition_variable mutex_condition; // Allows threads to wait on new jobs or termination 
-        std::vector<std::thread> threads;
-        std::queue<std::function<void()>> jobs;
+    bool Exit = false;
+    size_t THREADS_NUM;
+    bool should_terminate = false;           // Tells threads to stop looking for jobs
+    std::mutex queue_mutex;                  // Prevents data races to the job queue
+    std::condition_variable mutex_condition; // Allows threads to wait on new jobs or termination 
+    std::vector<std::thread> threads;
+    std::queue<std::function<void(int)>> jobs;
 };
 
 #endif
