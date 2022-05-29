@@ -1,7 +1,7 @@
 #include "../include/threadPool.hpp"
 #include "../include/server.hpp"
 
-// ThreadPool::ThreadPool() {}
+ThreadPool::ThreadPool() {}
 
 void ThreadPool::Start() {
     const uint32_t num_threads = (std::thread::hardware_concurrency()/2) + 1;  // Max # of threads the system supports
@@ -13,7 +13,6 @@ void ThreadPool::Start() {
             threads.at(i) = std::thread(&ThreadPool::ThreadLoop,this);
         }
     }
-
 }
 
 void ThreadPool::exit_listener() {
@@ -29,12 +28,14 @@ void ThreadPool::exit_listener() {
 bool ThreadPool::getExit() {
     return this->Exit;
 }
+
 void ThreadPool::ThreadLoop() {
     while (true) {
         int number;
         std::function<void()> job;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
+            std::cout << "Waiting for a job\n";
             mutex_condition.wait(lock, [this] {
                 return !jobs.empty() || should_terminate;
             });
@@ -48,7 +49,6 @@ void ThreadPool::ThreadLoop() {
         job();
     }
 }
-
 
 void ThreadPool::QueueJob(const std::function<void()>& job) {
     {
