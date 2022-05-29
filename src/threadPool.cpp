@@ -32,9 +32,8 @@ bool ThreadPool::getExit() {
 void ThreadPool::ThreadLoop() {
     while (true) {
         int number;
-        std::function<void(int n)> job;
+        std::function<void()> job;
         {
-            int num = n;
             std::unique_lock<std::mutex> lock(queue_mutex);
             mutex_condition.wait(lock, [this] {
                 return !jobs.empty() || should_terminate;
@@ -46,12 +45,12 @@ void ThreadPool::ThreadLoop() {
             job = jobs.front();
             jobs.pop();
         }
-        job(this->THREADS_NUM);
+        job();
     }
 }
 
 
-void ThreadPool::QueueJob(const std::function<void(int)>& job) {
+void ThreadPool::QueueJob(const std::function<void()>& job) {
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
         jobs.push(job);
