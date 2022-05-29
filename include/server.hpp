@@ -1,8 +1,6 @@
 #ifndef FTP_SERVER
 #define FTP_SERVER
 
-// HEADERS
-#include "client.hpp"
 
 // LIBRARIES
 #include <list>
@@ -12,21 +10,21 @@
 #include  <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
+#include <iostream>
+
 #define POOL_SIZE 5
 #define SERVER_PORT 8080
 #define MAX_TRANSMISSION_LENGTH 100000
 #define MAX_THREAD_NUMBER 256
 
 #define ERROR_SOCKET -3
+
+extern int server_sock;
+
 class Server{
 
     private: 
-        int server_sock;
         struct sockaddr_in server_address;
-        std::vector<Client> clients;
-        int client_number;
-        std::vector<int> fd;
-        bool newClient;
         int addToThreads();
         int handleClient();
         void create_server_sock();
@@ -39,6 +37,7 @@ class Server{
 
         // METHODS
         void run();
+        void closeFD();
         int getServerSockID();
 };
 
