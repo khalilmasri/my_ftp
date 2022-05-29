@@ -41,8 +41,8 @@ int main(int argc, char **argv){
             //     exit(-1);
             // }
             int num = 1;
-            std::function<void(int)> job = [](int num){return num;};
-            Th.QueueJob(job);
+            /* std::function<void(int)> job = [](int num){return num;}; */
+            /* Th.QueueJob(job); */
     }
 
      Th.Stop();  
