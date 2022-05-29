@@ -39,6 +39,7 @@ class Server{
 
         // METHODS
         void run();
+        int getServerSockID();
 };
 
 
