@@ -7,7 +7,8 @@
 #include <thread>
 #include <functional>
 #include <condition_variable>
-
+#include <iostream>
+#include <string>
 
 class ThreadPool {
 public:

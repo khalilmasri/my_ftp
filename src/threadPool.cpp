@@ -1,11 +1,16 @@
-#include "../include/threadPool.hpp"
-#include "../include/server.hpp"
+#include "threadPool.hpp"
+#include "logger.hpp"
 
-ThreadPool::ThreadPool() {}
+ThreadPool::ThreadPool() {
+    Start();
+}
 
 void ThreadPool::Start() {
-    const uint32_t num_threads = (std::thread::hardware_concurrency()/2) + 1;  // Max # of threads the system supports
+    const uint32_t num_threads = std::thread::hardware_concurrency();  // Max # of threads the system supports
     threads.resize(num_threads);
+
+    DBG_PRINT_LOGGER("Creating thread pool...");
+
     for (uint32_t i = 0; i < num_threads; i++) {
         if (i == 0) {
             threads.at(i) = std::thread(&ThreadPool::exit_listener,this);
@@ -13,6 +18,8 @@ void ThreadPool::Start() {
             threads.at(i) = std::thread(&ThreadPool::ThreadLoop,this);
         }
     }
+
+    DBG_PRINT_LOGGER("Thread pool is ready!");
 }
 
 void ThreadPool::exit_listener() {
@@ -22,6 +29,7 @@ void ThreadPool::exit_listener() {
         std::getline(std::cin, command);
     }
 
+    DBG_PRINT_LOGGER("Wrapping things up!");
     this->Exit = true;
 }
 
@@ -35,7 +43,6 @@ void ThreadPool::ThreadLoop() {
         std::function<void()> job;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
-            std::cout << "Waiting for a job\n";
             mutex_condition.wait(lock, [this] {
                 return !jobs.empty() || should_terminate;
             });
@@ -69,6 +76,7 @@ bool ThreadPool::busy() {
 
 void ThreadPool::Stop() {
     {
+        DBG_PRINT_LOGGER("Closing all threads...");
         std::unique_lock<std::mutex> lock(queue_mutex);
         should_terminate = true;
     }

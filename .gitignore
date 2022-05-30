@@ -2,3 +2,5 @@ ftp
 obj/*
 obj
 client/*
+.vscode
+.vscode/*

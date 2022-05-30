@@ -1,9 +1,10 @@
-#include "../include/server.hpp"
-#include "../include/threadPool.hpp"
+#include "server.hpp"
+#include "logger.hpp"
 
 int server_sock;
 
 Server::Server(){
+    DBG_PRINT_LOGGER("Initiating server...");
     create_server_sock();
     run();
 }
@@ -19,7 +20,6 @@ void Server::create_server_sock(){
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         std::cout << "socket err\n";
-        closeFD();
         exit(-1);
     }
 
@@ -35,7 +35,8 @@ void Server::create_server_sock(){
 }
 
 void Server::closeFD(){
-    std::cout << "Disconnecting server...\n";
+    DBG_PRINT_LOGGER("Disconnecting server...");
+    DBG_PRINT_LOGGER("Disconnected!");
     close(server_sock);
 }
 

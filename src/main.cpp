@@ -16,12 +16,11 @@
  * =====================================================================================
  */
 
-#include "../include/exception.hpp"
-#include "../include/server.hpp"
-#include "../include/client.hpp"
-#include <string>
-#include "../include/threadPool.hpp"
-
+#include "exception.hpp"
+#include "server.hpp"
+#include "client.hpp"
+#include "threadPool.hpp"
+#include "logger.hpp"
 
 int main(int argc, char **argv){
 
@@ -30,16 +29,18 @@ int main(int argc, char **argv){
     
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
     ThreadPool tp;
-
+    
+    DBG_PRINT_LOGGER("Waiting for requests");
     // WHILE THE SERVER IS STILL RUNNING
-    while(!tp.getExit()){
+    while(tp.getExit() == false){
+
         // AND THE THE THREADPOOL IS NOT BUSY
         if(tp.busy()){
             // CREATE A CLIENT AND WAIT FOR A REQUEST TO BE SENT
             tp.QueueJob([]{Client client;});
         }
     }
-
+    
     // CLOSE ALL THREADS
     tp.Stop();  
 
