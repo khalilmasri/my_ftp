@@ -36,8 +36,8 @@ void Server::create_server_sock(){
 
 void Server::closeFD(){
     DBG_PRINT_LOGGER("Disconnecting server...");
-    DBG_PRINT_LOGGER("Disconnected!");
     close(server_sock);
+    DBG_PRINT_LOGGER("Disconnected!");
 }
 
 void Server::run(){
