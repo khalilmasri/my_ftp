@@ -25,10 +25,10 @@ class Server{
 
     private: 
         struct sockaddr_in server_address;
-        int addToThreads();
-        int handleClient();
+        int  addToThreads();
+        int  handleClient();
         void create_server_sock();
-        bool     create_thread_pool(void);
+        bool create_thread_pool(void);
 
     public:
         Server();
@@ -38,7 +38,7 @@ class Server{
         // METHODS
         void run();
         void closeFD();
-        int getServerSockID();
+        int  getServerSockID();
 };
 
 

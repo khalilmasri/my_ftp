@@ -18,7 +18,7 @@
 
 #include "exception.hpp"
 #include "server.hpp"
-#include "client.hpp"
+#include "ftp.hpp"
 #include "threadPool.hpp"
 #include "logger.hpp"
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv){
         // AND THE THE THREADPOOL IS NOT BUSY
         if(tp.busy()){
             // CREATE A CLIENT AND WAIT FOR A REQUEST TO BE SENT
-            tp.QueueJob([]{Client client;});
+            tp.QueueJob([]{Ftp request;});
         }
     }
     

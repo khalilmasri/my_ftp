@@ -1,34 +1,32 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef FTP_HPP
+#define FTP_HPP
 
 // LIBRARIES
 #include <thread>
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include  <arpa/inet.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 
 #include "server.hpp"
 
 extern int server_sock;
 
-#define TIMEOUT 3
-
 #define MAX_TRANSMISSION_LENGTH 100000
 
-class Client{
+class Ftp{
     private:
-        int client_ID;
-        struct sockaddr_in client_addr;
+        int request_id;
+        struct sockaddr_in request_addr;
         char buff[MAX_TRANSMISSION_LENGTH];
-        socklen_t addr_size = sizeof(client_addr);
+        socklen_t addr_size = sizeof(request_addr);
 
         void listen_request();
         void handle_request();
 
     public:
-        Client();
+        Ftp();
 };
 
 #endif
