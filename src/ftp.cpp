@@ -2,6 +2,7 @@
 
 Ftp::Ftp(){
     listen_request();
+    close(this->request_id);
 }
 
 void Ftp::listen_request() {
@@ -12,12 +13,26 @@ void Ftp::listen_request() {
         return;
     }
     
+    getRequest();
+}
+
+void Ftp::getRequest() {
+    recv(request_id, buff, MAX_TRANSMISSION_LENGTH, 0);
+    std::cout << "Message -> " << buff << std::endl;
+
     handle_request();
 }
 
-void Ftp::handle_request() {
-    std::cout << "HANDLING\n";
-    close(this->request_id);
-}
+void Ftp::handle_request(){
 
+    std::ifstream file (buff, std::ifstream::in);
+    
+    char message[MAX_TRANSMISSION_LENGTH];
+
+    file.read(message, MAX_TRANSMISSION_LENGTH);
+
+    send(request_id, message, MAX_TRANSMISSION_LENGTH, 0);
+    
+    file.close();
+}
 

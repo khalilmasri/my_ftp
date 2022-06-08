@@ -4,6 +4,7 @@
 // LIBRARIES
 #include <thread>
 #include <iostream>
+#include <fstream>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -23,6 +24,7 @@ class Ftp{
         socklen_t addr_size = sizeof(request_addr);
 
         void listen_request();
+        void getRequest();
         void handle_request();
 
     public:
