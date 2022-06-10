@@ -1,6 +1,8 @@
-ftp
+!*.cpp
+!*.hpp
+!README.md
+!Makefile
+client
+server
+!src/*
 obj/*
-obj
-client/*
-.vscode
-.vscode/*

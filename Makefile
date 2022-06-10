@@ -1,30 +1,54 @@
 SRC=src
+SERVERSRC=$(SRC)/server
+CLIENTSRC=$(SRC)/client
 OBJ=obj
+CLIENTOBJ=$(OBJ)/client
+SERVEROBJ=$(OBJ)/server
 BIN=bin
 
 CFLAGS += -Wfatal-errors -w -pthread -I ./include
-CC=clang++ -std=c++11
-TARGET=ftp
+CC=g++ -std=c++11
+SERVERTARGET=server
+CLIENTTARGET=client
 RM=rm -rf
+MKDR=mkdir -p
 
-$(shell mkdir -p obj)
+OBJDIR := $(shell $(MKDR) $(OBJ) $(CLIENTOBJ) $(SERVEROBJ))
 
-SRCS=$(wildcard $(SRC)/*.cpp)
-OBJS=$(patsubst $(SRC)/%.cpp, $(OBJ)/%.o, $(SRCS))
+SERVERSRCS=$(wildcard $(SERVERSRC)/*.cpp)
+SERVEROBJS=$(patsubst $(SERVERSRC)/%.cpp, $(SERVEROBJ)/%.o, $(SERVERSRCS))
 
-$(TARGET): $(OBJS)
-	$(CC) -o $(TARGET) $(OBJS) $(CFLAGS)
+CLIENTSRCS=$(wildcard $(CLIENTSRC)/*.cpp)
+CLIENTOBJS=$(patsubst $(CLIENTSRC)/%.cpp, $(CLIENTOBJ)/%.o, $(CLIENTSRCS))
 
-$(OBJ)/%.o: $(SRC)/%.cpp
-	${CC} ${CFLAGS} -I include -c $< -o $@
+
+# server
+
+all: $(SERVERTARGET) $(CLIENTTARGET)
+
+$(SERVERTARGET): $(SERVEROBJS)
+		$(CC) -o $(SERVERTARGET) $(SERVEROBJS) $(CFLAGS)
+
+$(SERVEROBJ)/%.o: $(SERVERSRC)/%.cpp
+		${CC} ${CFLAGS} -c $< -o $@
+
+# Client
+$(CLIENTTARGET): $(CLIENTOBJS)
+		$(CC) -o $(CLIENTTARGET) $(CLIENTOBJS) $(CFLAGS)
+
+$(CLIENTOBJ)/%.o: $(CLIENTSRC)/%.cpp
+		${CC} ${CFLAGS} -c $< -o $@
 
 clean:
-	$(RM) $(OBJ)/*.o 
+	$(RM) $(OBJ)/*/*.o 
 
 fclean: clean
-	$(RM) $(TARGET) $(OBJ)
+	$(RM) $(SERVERTARGET)
+	$(RM) $(CLIENTTARGET)
+	$(RM) $(OBJ)
 
-re: 	fclean all
+re: 	clean
+		$(MAKE) all
 
 .PHONY: all clean fclean re
 
