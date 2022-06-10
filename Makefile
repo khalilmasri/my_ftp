@@ -48,7 +48,7 @@ fclean: clean
 	$(RM) $(OBJ)
 
 re: 	clean
-		$(MAKE) all
+	$(MAKE) all
 
 .PHONY: all clean fclean re
 
