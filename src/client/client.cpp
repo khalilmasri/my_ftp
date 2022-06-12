@@ -5,6 +5,7 @@ Client::Client(){
     createClient();
     sendRequest();
     /* receiveFile(); */
+    readCommand();
     close(client_socket);
 }
 
@@ -40,6 +41,15 @@ void Client::sendRequest(){
     file.write(buffer, 10000);
 
     file.close();
+}
+
+void Client::readCommand(){
+    char buffer[MAX_CMD_SIZE];
+
+    //read command from terminal
+    std::cin.getline(buffer, MAX_CMD_SIZE);
+    std::cout << "Command -> " << buffer << std::endl;
+    
 }
 
 

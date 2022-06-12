@@ -3,8 +3,15 @@
 
 int server_sock;
 
-Server::Server(){
+Server::Server(std::string portNumber, std::string filePath) {
     DBG_PRINT_LOGGER("Initiating server...");
+    //get port number and file path from server initiation
+    getPortNumber(portNumber);
+    getFiePath(filePath);
+
+    std::cout << "Port number: " << portNumber << std::endl;
+    std::cout << "File path: " << filePath << std::endl;
+
     create_server_sock();
     run();
 }
@@ -14,6 +21,14 @@ Server::~Server(){};
 Server& Server::operator = (const Server& rhs){
     (void)rhs;
     return *this;
+}
+
+void Server::getPortNumber(std::string portNumber){
+    this->portNumber = std::stoi(portNumber);
+}
+
+void Server::getFiePath(std::string filePath){
+    this->filePath = filePath;
 }
 
 void Server::create_server_sock(){

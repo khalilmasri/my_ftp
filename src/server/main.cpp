@@ -24,8 +24,11 @@
 
 int main(int argc, char **argv){
 
+    //check if number of arguments is 3 for ./server [port] [path] silenced for now til further
+    //assert(argc == 3);
+
     // CREATE AND RUN THE SERVER
-    Server server;
+    Server server(argv[1], argv[2]);
     
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
     ThreadPool tp;

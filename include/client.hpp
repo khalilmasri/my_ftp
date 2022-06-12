@@ -37,6 +37,7 @@ class Client{
         void createClient();
         void sendRequest();
         void receiveFile();
+        void readCommand();
         std::string server_ip = "127.0.0.1";
         std::string server_port = "8080";
         int client_socket;
