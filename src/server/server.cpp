@@ -27,7 +27,7 @@ void Server::getPortNumber(std::string portNumber){
     this->portNumber = std::stoi(portNumber);
 }
 
-void Server::getFiePath(std::string filePath){
+void Server::getFilePath(std::string filePath){
     this->filePath = filePath;
 }
 
