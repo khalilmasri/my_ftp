@@ -2,7 +2,6 @@
 #define CLIENT_HPP
 
 #include <iostream>
-
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -13,8 +12,10 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-     #include <netdb.h>
+#include <netdb.h>
 #include <fstream>
+
+
 #define SERVER_PORT 8080
 #define SERVER_RES_MAX_LENGTH 256
 #define PATH_TO_SOCKET "/tmp"
@@ -39,7 +40,7 @@ class Client{
         void receiveFile();
         void readCommand();
         std::string server_ip = "127.0.0.1";
-        std::string server_port = "8080";
+        int server_port = SERVER_PORT;
         int client_socket;
 };
 

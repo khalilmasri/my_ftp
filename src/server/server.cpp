@@ -38,7 +38,7 @@ void Server::create_server_sock(){
         exit(-1);
     }
 
-    this->server_address.sin_port = SERVER_PORT;
+    this->server_address.sin_port = portNumber;
     this->server_address.sin_family = AF_INET;
     this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
