@@ -7,7 +7,7 @@ Server::Server(std::string portNumber, std::string filePath) {
     DBG_PRINT_LOGGER("Initiating server...");
     //get port number and file path from server initiation
     getPortNumber(portNumber);
-    getFiePath(filePath);
+    getFilePath(filePath);
 
     std::cout << "Port number: " << portNumber << std::endl;
     std::cout << "File path: " << filePath << std::endl;
