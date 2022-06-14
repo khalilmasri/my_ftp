@@ -22,8 +22,7 @@ Server::~Server(){};
 void Server::createServerSock(){
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        LOG_ERR("socket err");
-        exit(-1);
+        LOG_CRIT("socket error");
     }
 
     this->server_address.sin_port = SERVER_PORT;
@@ -31,9 +30,8 @@ void Server::createServerSock(){
     this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if((bind(server_sock, (struct sockaddr*)&this->server_address, sizeof(this->server_address))) < 0){
-        LOG_ERR("Failed to bind");
         closeServer();
-        exit(1);
+        LOG_CRIT("Failed to bind");
     }
 }
 
@@ -47,8 +45,7 @@ void Server::run(){
 
     if (listen(server_sock, MAX_THREAD_NUMBER) < 0)
     {
-        LOG_ERR("Try again later");
-        exit (-1);
+        LOG_CRIT("Try again later");
     }
 }
 

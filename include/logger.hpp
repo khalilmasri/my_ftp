@@ -7,27 +7,30 @@
 #include <cstdio>
 #include <cstring>
 
+enum logPriority{
+    trace       = 0, 
+    debug       = 1, 
+    info        = 2, 
+    warning     = 3, 
+    error       = 4,
+    critical   = 5
+};
+
 #define LOG_TRACE(format...)    Logger::Trace(__FILE__, format);
 #define LOG_INFO(format...)     Logger::Info(__FILE__, format);
 #define LOG_DEBUG(format...)    Logger::Debug(__FILE__, format);
 #define LOG_WARN(format...)     Logger::warning(__FILE__, format);
 #define LOG_ERR(format...)      Logger::Error(__FILE__, format);
+#define LOG_CRIT(format...)     Logger::Critical(__FILE__, format);
 
 #define __FILENAME__(file) (std::strrchr(file, '/') ? std::strrchr(file, '/') + 1 : file)
 
-enum logPriority{
-    trace   = 0, 
-    debug   = 1, 
-    info    = 2, 
-    warning = 3, 
-    error   = 4
-};
 
 class Logger
 {
     private:
         std::mutex log_mutex;
-        logPriority priority = error;
+        logPriority priority = critical;
 
         template<typename... Args>
         static void log(const char* msg_prio_str, logPriority msg_prio, const char* file, const char* msg, Args... args){
@@ -79,6 +82,11 @@ class Logger
             log("[Error]||", error, file, msg, args...);
         }
 
+        template<typename... Args>
+        static void Critical(const char* file, const char* msg, Args... args){
+            log("[Critical]||", critical, file, msg, args...);
+            exit(1);
+        }
 };
 
 #endif

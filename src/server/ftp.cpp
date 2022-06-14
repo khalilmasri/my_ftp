@@ -1,4 +1,5 @@
 #include "ftp.hpp"
+#include "logger.hpp"
 
 Ftp::Ftp(){
     listen_request();
@@ -9,7 +10,7 @@ void Ftp::listen_request() {
 
     if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
     {
-        std::cout << "accept Error\n";
+        LOG_ERR("accept Error");
         return;
     }
     
