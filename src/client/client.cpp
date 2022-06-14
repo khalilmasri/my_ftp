@@ -21,7 +21,7 @@ void Client::createClient() {
         return;
 
     client.sin_family = AF_INET;
-    client.sin_port = SERVER_PORT;
+    client.sin_port = 21;
     client.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int connect_socket = connect(client_socket, (struct sockaddr *) &client, sizeof(client));
@@ -30,7 +30,10 @@ void Client::createClient() {
 void Client::sendRequest(){
     
     char arg[] = "test.txt";
-    send(client_socket, arg,9, 0 );
+    std::string input;
+    std::cout << "Input" << std::endl;
+    std::getline(std::cin, input);
+    send(client_socket, input.c_str(),100, 0 );
     
     char buffer[10000];
     recv(client_socket, buffer, 10000, 0);
