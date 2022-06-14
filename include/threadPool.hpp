@@ -13,6 +13,7 @@
 class ThreadPool {
 public:
     ThreadPool();
+    ~ThreadPool();
     void Start();
     void QueueJob(const std::function<void()>& job);
     void Stop();

@@ -5,6 +5,8 @@ ThreadPool::ThreadPool() {
     Start();
 }
 
+ThreadPool::~ThreadPool(){}
+
 void ThreadPool::Start() {
     const uint32_t num_threads = std::thread::hardware_concurrency();  // Max # of threads the system supports
     threads.resize(num_threads);

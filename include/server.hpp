@@ -25,25 +25,17 @@ class Server{
 
     private: 
         struct sockaddr_in server_address;
-        int portNumber;
-        std::string filePath;
-        int  addToThreads();
-        int  handleClient();
-        void create_server_sock();
-        bool create_thread_pool(void);
+        void createServerSock();
         
-
     public:
-        Server(std::string portNumber, std::string filePath);
+        Server();
         Server& operator = (const Server&);
         ~Server();
 
         // METHODS
         void run();
-        void closeFD();
+        void closeServer();
         int  getServerSockID();
-        void setPortNumber(std::string);
-        void setFilePath(std::string);
 };
 
 

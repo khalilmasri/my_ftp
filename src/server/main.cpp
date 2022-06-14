@@ -16,39 +16,36 @@
  * =====================================================================================
  */
 
-#include "exception.hpp"
 #include "server.hpp"
 #include "ftp.hpp"
 #include "threadPool.hpp"
 #include "logger.hpp"
 
-int main(int argc, char **argv){
-
-    //check if number of arguments is 3 for ./server [port] [path]
+int main(void){
 
     // CREATE AND RUN THE SERVER
-    Server server(argv[1], argv[2]);
+    Server server;
     
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
-    ThreadPool tp;
+    ThreadPool thread_pool;
     
 
     LOG_INFO("Waiting for requests");
     // WHILE THE SERVER IS STILL RUNNING
-    while(tp.getExit() == false){
+    while(thread_pool.getExit() == false){
 
         // AND THE THE THREADPOOL IS NOT BUSY
-        if(tp.busy()){
+        if(thread_pool.busy()){
             // CREATE A CLIENT AND WAIT FOR A REQUEST TO BE SENT
-            tp.QueueJob([]{Ftp request;});
+            thread_pool.QueueJob([]{Ftp request;});
         }
     }
     
     // CLOSE ALL THREADS
-    tp.Stop();  
+    thread_pool.Stop();  
 
     // DISCONNECTS THE SERVER
-    server.closeFD();
+    server.closeServer();
 
     return 0;
 }
