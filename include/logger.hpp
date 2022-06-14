@@ -26,7 +26,7 @@ class Logger
 {
     private:
         std::mutex log_mutex;
-        logPriority priority = info;
+        logPriority priority = error;
 
         template<typename... Args>
         static void log(const char* msg_prio_str, logPriority msg_prio, const char* file, const char* msg, Args... args){
