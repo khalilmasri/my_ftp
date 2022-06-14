@@ -26,9 +26,14 @@ class Server{
     private: 
         struct sockaddr_in server_address;
         void createServerSock();
+        void setFilePath(std::string);
+        void setServerPort(std::string);
+
+        int server_port;
+        std::string file_path;
         
     public:
-        Server();
+        Server(std::string, std::string);
         Server& operator = (const Server&);
         ~Server();
 

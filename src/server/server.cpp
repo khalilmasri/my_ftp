@@ -3,9 +3,12 @@
 
 int server_sock;
 
-Server::Server() {
+Server::Server(const std::string port, const std::string filePath) {
 
-    LOG_INFO("Initiating server with port %d", SERVER_PORT);
+    setServerPort(port);
+    setFilePath(filePath);
+
+    LOG_INFO("Initiating server with port [%d] and file path [%s]", this->server_port, this->file_path.c_str());
 
     createServerSock();
     run();
@@ -25,7 +28,7 @@ void Server::createServerSock(){
         LOG_CRIT("socket error");
     }
 
-    this->server_address.sin_port = SERVER_PORT;
+    this->server_address.sin_port = server_port;
     this->server_address.sin_family = AF_INET;
     this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
@@ -39,6 +42,14 @@ void Server::closeServer(){
     LOG_INFO("Disconnecting server...");
     close(server_sock);
     LOG_INFO("Disconnected!");
+}
+
+void Server::setServerPort(const std::string port){
+    this->server_port = std::stoi(port);
+}
+
+void Server::setFilePath(std::string file_path){
+    this->file_path = file_path;
 }
 
 void Server::run(){

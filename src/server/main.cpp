@@ -21,10 +21,14 @@
 #include "threadPool.hpp"
 #include "logger.hpp"
 
-int main(void){
+int main(int argc, char** argv){
 
     // CREATE AND RUN THE SERVER
-    Server server;
+    if(argc != 3) {
+        LOG_CRIT("Usage ./server PORT PATH");
+    }
+
+    Server server(argv[1], argv[2]);
     
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
     ThreadPool thread_pool;

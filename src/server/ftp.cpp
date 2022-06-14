@@ -14,6 +14,7 @@ void Ftp::listen_request() {
         return;
     }
     
+    std::cout << "I HEARD SOMRTHING\n";
     getRequest();
 }
 
