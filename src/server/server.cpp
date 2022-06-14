@@ -4,13 +4,12 @@
 int server_sock;
 
 Server::Server(std::string portNumber, std::string filePath) {
-    DBG_PRINT_LOGGER("Initiating server...");
-    //get port number and file path from server initiation
-    getPortNumber(portNumber);
-    getFilePath(filePath);
 
-    std::cout << "Port number: " << portNumber << std::endl;
-    std::cout << "File path: " << filePath << std::endl;
+    //get port number and file path from server initiation
+    setPortNumber(portNumber);
+    setFilePath(filePath);
+
+    LOG_INFO("Initiating server with port %d %d %d %d", 21, 0, 1, 2);
 
     create_server_sock();
     run();
@@ -23,11 +22,11 @@ Server& Server::operator = (const Server& rhs){
     return *this;
 }
 
-void Server::getPortNumber(std::string portNumber){
+void Server::setPortNumber(std::string portNumber){
     this->portNumber = std::stoi(portNumber);
 }
 
-void Server::getFilePath(std::string filePath){
+void Server::setFilePath(std::string filePath){
     this->filePath = filePath;
 }
 
@@ -50,9 +49,9 @@ void Server::create_server_sock(){
 }
 
 void Server::closeFD(){
-    DBG_PRINT_LOGGER("Disconnecting server...");
+    LOG_INFO("Disconnecting server...");
     close(server_sock);
-    DBG_PRINT_LOGGER("Disconnected!");
+    LOG_INFO("Disconnected!");
 }
 
 void Server::run(){

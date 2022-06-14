@@ -9,7 +9,7 @@ void ThreadPool::Start() {
     const uint32_t num_threads = std::thread::hardware_concurrency();  // Max # of threads the system supports
     threads.resize(num_threads);
 
-    DBG_PRINT_LOGGER("Creating thread pool...");
+    LOG_INFO("Creating thread pool...");
 
     for (uint32_t i = 0; i < num_threads; i++) {
         if (i == 0) {
@@ -19,7 +19,7 @@ void ThreadPool::Start() {
         }
     }
 
-    DBG_PRINT_LOGGER("Thread pool is ready!");
+    LOG_INFO("Thread pool is ready!");
 }
 
 void ThreadPool::exit_listener() {
@@ -29,7 +29,7 @@ void ThreadPool::exit_listener() {
         std::getline(std::cin, command);
     }
 
-    DBG_PRINT_LOGGER("Wrapping things up!");
+    LOG_INFO("Wrapping things up!");
     this->Exit = true;
 }
 
@@ -77,7 +77,7 @@ bool ThreadPool::busy() {
 
 void ThreadPool::Stop() {
 
-    DBG_PRINT_LOGGER("Closing all threads...");
+    LOG_INFO("Closing all threads...");
     std::unique_lock<std::mutex> lock(queue_mutex);
     should_terminate = true;
 
@@ -87,5 +87,5 @@ void ThreadPool::Stop() {
         active_thread.detach();
     }
     threads.clear();
-    DBG_PRINT_LOGGER("All threads are closed!");
+    LOG_INFO("All threads are closed!");
 }

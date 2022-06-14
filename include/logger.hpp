@@ -2,39 +2,82 @@
 #define LOGGER_HPP
 
 #include <iostream>
-#include <string.h>
-#include <map>
+#include <mutex>
+#include <cstdio>
+#include <cstring>
 
-#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define LOG_TRACE(format...)    Logger::Trace(__FILE__, format);
+#define LOG_INFO(format...)     Logger::Info(__FILE__, format);
+#define LOG_DEBUG(format...)    Logger::Debug(__FILE__, format);
+#define LOG_WARN(format...)     Logger::warning(__FILE__, format);
+#define LOG_ERR(format...)      Logger::Error(__FILE__, format);
 
-#define DBG_PRINT_LOGGER(format) \
-    std::cout << "[LOG]|" << __FILENAME__ << "|" << format << std::endl;
+#define __FILENAME__(file) (std::strrchr(file, '/') ? std::strrchr(file, '/') + 1 : file)
 
-#define DBG_PRINT_ERR(format) \
-    std::cout << "[LOG]|" << __FILENAME__ << "|" << format << std::endl;
+enum logPriority{
+    trace   = 0, 
+    debug   = 1, 
+    info    = 2, 
+    warning = 3, 
+    error   = 4
+};
 
-// enum logLevel_e {
-//     logError    = 0,
-//     logWarning  = 1,
-//     logInfo     = 2,
-//     logDebug    = 3
-// };
+class Logger
+{
+    private:
+        std::mutex log_mutex;
+        logPriority priority = info;
 
+        template<typename... Args>
+        static void log(const char* msg_prio_str, logPriority msg_prio, const char* file, const char* msg, Args... args){
+                        
+            if(msg_prio <= getInstance().priority){
+                {
+                    std::unique_lock<std::mutex> lock(getInstance().log_mutex);
+                    std::cout << msg_prio_str;
+                    std::cout << __FILENAME__(file) << "||";
+                    std::printf(msg, args...);
+                    std::cout << std::endl;
+                }
+            }
+        }
 
-// class Logger {
+        static Logger& getInstance(){
+            static Logger logger;
+            return logger;
+        }
 
-//     public:
-//         Logger();
-//         Logger(const logLevel_e&);
+    public:
+        
+        static void setPriority(logPriority new_priority){
+            getInstance().priority = new_priority;
+        }
 
-//         ~Logger();
+        template<typename... Args>
+        static void Trace(const char* file, const char* msg, Args... args){
+            log("[Trace]||", trace, file, msg, args...);
+        }
 
-//         friend void operator << (logLevel_e&, const std::string&);
+        template<typename... Args>
+        static void Debug(const char* file, const char* msg, Args... args){
+            log("[Debug]||", debug, file, msg, args...);
+        }
 
-//     private:
-//         std::string buffer;
-//         logLevel_e logLevel;
-//         std::map < logLevel_e , std::string > log_table;
-// };
+        template<typename... Args>
+        static void Info(const char* file, const char* msg, Args... args){
+            log("[Info]||", info, file, msg, args...);
+        }
+
+        template<typename... Args>
+        static void Warning(const char* file, const char* msg, Args... args){
+            log("[Warning]||", warning, file, msg, args...);
+        }
+
+        template<typename... Args>
+        static void Error(const char* file, const char* msg, Args... args){
+            log("[Error]||", error, file, msg, args...);
+        }
+
+};
 
 #endif

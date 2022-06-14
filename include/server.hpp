@@ -42,8 +42,8 @@ class Server{
         void run();
         void closeFD();
         int  getServerSockID();
-        void getPortNumber(std::string);
-        void getFilePath(std::string);
+        void setPortNumber(std::string);
+        void setFilePath(std::string);
 };
 
 

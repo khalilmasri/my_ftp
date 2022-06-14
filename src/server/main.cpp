@@ -25,7 +25,6 @@
 int main(int argc, char **argv){
 
     //check if number of arguments is 3 for ./server [port] [path]
-    assert(argc == 3);
 
     // CREATE AND RUN THE SERVER
     Server server(argv[1], argv[2]);
@@ -33,7 +32,8 @@ int main(int argc, char **argv){
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
     ThreadPool tp;
     
-    DBG_PRINT_LOGGER("Waiting for requests");
+
+    LOG_INFO("Waiting for requests");
     // WHILE THE SERVER IS STILL RUNNING
     while(tp.getExit() == false){
 
