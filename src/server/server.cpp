@@ -33,13 +33,13 @@ void Server::createServerSock(){
 
     this->server_address.sin_port = server_port;
     this->server_address.sin_family = AF_INET;
-    this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    this->server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+
     
     if(setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR,&optval,sizeof(int)) < 0){
         closeServer();
         LOG_CRIT("Failed to set socket options!");
         exit(1);
-
     }
 
     if((bind(server_sock, (struct sockaddr*)&this->server_address, sizeof(this->server_address))) < 0){

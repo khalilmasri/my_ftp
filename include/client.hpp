@@ -27,6 +27,7 @@
 #define BIND_FAILED -4
 #define CONNECTION_FAILED -5
 #define MAX_CMD_SIZE 100
+#define MAX_TRANSMISSION_LENGTH 100000
 
 class Client{
 
@@ -35,6 +36,8 @@ class Client{
         ~Client();
 
     private:
+        struct sockaddr_in client;
+        struct sockaddr_in bind_addr;
         void createClient();
         void sendRequest();
         void receiveFile();
@@ -42,6 +45,7 @@ class Client{
         std::string server_ip = "127.0.0.1";
         int server_port = SERVER_PORT;
         int client_socket;
+
 };
 
 

@@ -7,7 +7,6 @@ Ftp::Ftp(){
 
     LOG_DEBUG("Finished sending");
 
-    shutdown(this->request_id, SHUT_RDWR);
     close(this->request_id);
 }
 
@@ -26,23 +25,27 @@ void Ftp::listen_request() {
     // handle_request();
 }
 
+using namespace std;
+
 void Ftp::getRequest() {
 
     while(current_state != 221){
+
+        memset(&buff, 0, sizeof(buff));//clear the buffer
         
-        if((recv(request_id, buff, MAX_TRANSMISSION_LENGTH, 0)) == -1){
+        if((recv(request_id, (char*)&buff, sizeof(buff), 0)) < 0){
             sendMsg(500);
-            continue;
+            return;
         }
 
         parseCommand();
         handleCommand();
 
-        if(authorized == true){
-            // handle_request();
+        if(authorized == true){ 
+            handle_request();
             LOG_DEBUG("Authorized");
         }
-    }
+    } 
 
 }
 
@@ -51,6 +54,7 @@ void Ftp::parseCommand(){
     std::string command = buff;
     size_t pos = 0;
 
+    
     while((pos = command.find(" ")) != std::string::npos){
         input.push_back(command.substr(0, pos));
         command.erase(0, pos + 1);
@@ -75,6 +79,7 @@ void Ftp::handleCommand(){
 }
 
 void Ftp::user_handle(){
+
     if(input.size() > 2){
         sendMsg(500);
         return;
@@ -102,6 +107,7 @@ void Ftp::pass_handle(){
         sendMsg(230);
         authorized = true;
     }else if( user == "admin" && *input.begin() == "admin"){
+        sendMsg(230);
         authorized = true;
     }else{
         sendMsg(530);
@@ -125,8 +131,13 @@ void Ftp::sendMsg(const int status){
 
     current_state = status;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
-    
-    send(request_id, server_reply.at(current_state).c_str(), MAX_TRANSMISSION_LENGTH,0);
+
+    char msg[1500];
+
+    memset(&msg, 0, sizeof(msg)); //clear the buffer
+    strcpy(msg, server_reply.at(current_state).c_str());
+
+    send(request_id, (char*)msg, sizeof(msg),0);
 }
 
 void Ftp::handle_request(){

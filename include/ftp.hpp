@@ -17,7 +17,7 @@
 extern int server_sock;
 extern bool detach;
 
-#define MAX_TRANSMISSION_LENGTH 100000
+#define MAX_TRANSMISSION_LENGTH 1500
 
 class Ftp{
 
