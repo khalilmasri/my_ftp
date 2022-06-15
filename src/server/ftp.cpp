@@ -6,6 +6,8 @@ Ftp::Ftp(){
     listen_request();
 
     LOG_DEBUG("Finished sending");
+
+    shutdown(this->request_id, SHUT_RDWR);
     close(this->request_id);
 }
 

@@ -21,7 +21,7 @@ void Client::createClient() {
         return;
 
     client.sin_family = AF_INET;
-    client.sin_port = 8080;
+    client.sin_port = 21;
     client.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int connect_socket = connect(client_socket, (struct sockaddr *) &client, sizeof(client));
