@@ -26,6 +26,7 @@ void Server::createServerSock(){
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         LOG_CRIT("socket error");
+        exit(1);
     }
 
     int optval = 1;
@@ -37,11 +38,14 @@ void Server::createServerSock(){
     if(setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR,&optval,sizeof(int)) < 0){
         closeServer();
         LOG_CRIT("Failed to set socket options!");
+        exit(1);
+
     }
 
     if((bind(server_sock, (struct sockaddr*)&this->server_address, sizeof(this->server_address))) < 0){
         closeServer();
         LOG_CRIT("Failed to bind");
+        exit(1);
     }
 }
 
@@ -49,6 +53,7 @@ void Server::closeServer(){
     LOG_INFO("Disconnecting server...");
     shutdown(server_sock, SHUT_RDWR);
     close(server_sock);
+    sleep(3);
     LOG_INFO("Disconnected!");
 }
 
@@ -65,6 +70,7 @@ void Server::run(){
     if (listen(server_sock, MAX_THREAD_NUMBER) < 0)
     {
         LOG_CRIT("Couldn't listen, Try again later");
+        exit(1);
     }
 }
 

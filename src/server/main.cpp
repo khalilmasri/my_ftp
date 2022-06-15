@@ -26,6 +26,7 @@ int main(int argc, char** argv){
     // CREATE AND RUN THE SERVER
     if(argc != 3) {
         LOG_CRIT("Usage ./server PORT PATH");
+        exit(1);
     }
 
     Server server(argv[1], argv[2]);
