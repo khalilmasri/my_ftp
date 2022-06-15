@@ -15,6 +15,7 @@
 #include "server.hpp"
 
 extern int server_sock;
+extern bool detach;
 
 #define MAX_TRANSMISSION_LENGTH 100000
 
@@ -46,6 +47,9 @@ class Ftp{
         void handleCommand();
         void handle_request();
 
+        // Message sender
+        void sendMsg(const int);
+
         // Command handlers
         void user_handle();
         void pass_handle();
@@ -70,10 +74,11 @@ class Ftp{
             {221 , "Service closing."},
             {227 , "Entering passive mode"},
             {226 , "send ok"},
-            {230 , "User looged in, proceed."},
+            {230 , "User logged in successfully."},
             {331 , "User name okay, need a password."},
             {332 , "Need account for login."},
-            {500 , "Syntax error, unkown command."}
+            {500 , "Syntax error, unkown command."},
+            {530 , "User password is wrong, didn't login."}
         };
 
     public:

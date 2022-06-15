@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 
+extern bool detach;
 class ThreadPool {
 public:
     ThreadPool();

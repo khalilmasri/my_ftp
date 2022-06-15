@@ -35,18 +35,17 @@ void Client::sendRequest(){
         std::cout << "Input" << std::endl;
         std::getline(std::cin, input);
         send(client_socket, input.c_str(),100, 0 );
+
+        char buffer[10000];
+        recv(client_socket, buffer, 10000, 0);
+        std::cout << "Message recieved -> " << buffer << std::endl;
+
+        // std::ofstream file (arg, std::ofstream::out);
+
+        // file.write(buffer, 10000);
+
+        // file.close();
     }
-
-    
-    char buffer[10000];
-    // recv(client_socket, buffer, 10000, 0);
-    // std::cout << "Message recieved -> " << buffer << std::endl;
-
-    // std::ofstream file (arg, std::ofstream::out);
-
-    // file.write(buffer, 10000);
-
-    // file.close();
 }
 
 void Client::readCommand(){

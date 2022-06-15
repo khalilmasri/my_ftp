@@ -1,6 +1,8 @@
 #include "threadPool.hpp"
 #include "logger.hpp"
 
+bool detach = false;
+
 ThreadPool::ThreadPool() {
     Start();
 }
@@ -85,6 +87,7 @@ void ThreadPool::Stop() {
 
     lock.unlock();
     mutex_condition.notify_all();
+    detach = true;
     for (std::thread& active_thread : threads) {
         active_thread.detach();
     }

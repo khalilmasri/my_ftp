@@ -16,7 +16,9 @@ void Ftp::listen_request() {
     LOG_DEBUG("Accept from socket => %d", server_sock);
     if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
     {
-        LOG_ERR("accept Error");
+        if(!detach){
+             LOG_ERR("accept Error");
+        }
         return;
     }
 
@@ -29,12 +31,17 @@ void Ftp::getRequest() {
     while(current_state != 221){
         
         if((recv(request_id, buff, MAX_TRANSMISSION_LENGTH, 0)) == -1){
-            LOG_ERR("%s", server_reply.at(500).c_str());
+            sendMsg(500);
             continue;
         }
 
         parseCommand();
         handleCommand();
+
+        if(authorized == true){
+            // handle_request();
+            LOG_DEBUG("Authorized");
+        }
     }
 
 }
@@ -64,19 +71,41 @@ void Ftp::handleCommand(){
     } 
     
     input.clear();
-    current_state = 500;
-    LOG_ERR("%s", server_reply.at(500).c_str());
+    sendMsg(500);
 }
 
 void Ftp::user_handle(){
-    LOG_DEBUG("USER HANDLE");
-    if (*input.begin() == "admin"){
-        LOG_DEBUG("LOGGED IN");
+    if(input.size() > 2){
+        sendMsg(500);
+        return;
+    }
+
+    if (*input.begin() == "Anonymous"){
+        sendMsg(331);
+        user = *input.begin();
+    } else if(*input.begin() == "admin"){
+        sendMsg(331);
+        user = *input.begin();
+    }else {
+        sendMsg(332);
     }
 }
 
 void Ftp::pass_handle(){
-    LOG_DEBUG("PASS HANDLE");
+
+    if(input.size() > 2){
+        sendMsg(530);
+        return;
+    }
+
+    if(user == "Anonymous" && *input.begin() == ""){
+        sendMsg(230);
+        authorized = true;
+    }else if( user == "admin" && *input.begin() == "admin"){
+        authorized = true;
+    }else{
+        sendMsg(530);
+    }
 }
 
 void Ftp::pasv_handle(){
@@ -89,7 +118,15 @@ void Ftp::list_handle(){
 
 void Ftp::quit_handle(){
     LOG_DEBUG("QUIT");
-    this->current_state = 221;
+    sendMsg(221);
+}
+
+void Ftp::sendMsg(const int status){
+
+    current_state = status;
+    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+    
+    send(request_id, server_reply.at(current_state).c_str(), MAX_TRANSMISSION_LENGTH,0);
 }
 
 void Ftp::handle_request(){
