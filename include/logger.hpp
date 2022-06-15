@@ -18,8 +18,8 @@ enum logPriority{
 
 #define DEBUG_ENABLED 1
 
-#define LOG_TRACE(format...)    Logger::Trace(__FILE__,__FUNCTION__, __LINE__, format);
-#define LOG_INFO(format...)     Logger::Info(__FILE__, __FUNCTION__, __LINE__, format);
+#define LOG_TRACE(format...)        Logger::Trace(__FILE__,__FUNCTION__, __LINE__, format);
+#define LOG_INFO(format...)         Logger::Info(__FILE__, __FUNCTION__, __LINE__, format);
 
 #if DEBUG_ENABLED
     #define LOG_DEBUG(format...)    Logger::Debug(__FILE__, __FUNCTION__, __LINE__, format);
@@ -27,9 +27,9 @@ enum logPriority{
     #define LOG_DEBUG(format...)
 #endif
 
-#define LOG_WARN(format...)     Logger::warning(__FILE__, __FUNCTION__, __LINE__, format);
-#define LOG_ERR(format...)      Logger::Error(__FILE__, __FUNCTION__, __LINE__,  format);
-#define LOG_CRIT(format...)     Logger::Critical(__FILE__, __FUNCTION__, __LINE__, format);
+#define LOG_WARN(format...)         Logger::warning(__FILE__, __FUNCTION__, __LINE__, format);
+#define LOG_ERR(format...)          Logger::Error(__FILE__, __FUNCTION__, __LINE__,  format);
+#define LOG_CRIT(format...)         Logger::Critical(__FILE__, __FUNCTION__, __LINE__, format);
 
 #define __FILENAME__(file) (std::strrchr(file, '/') ? std::strrchr(file, '/') + 1 : file)
 
@@ -41,7 +41,8 @@ class Logger
         logPriority priority = critical;
 
         template<typename... Args>
-        static void log(const char* msg_prio_str, logPriority msg_prio, const char* file,  int line, const char* func, const char* msg, Args... args){
+        static void log(const char* msg_prio_str, logPriority msg_prio, const char* file,  int line, const char* func, const char* msg, Args... args)
+        {
                         
             if(msg_prio <= getInstance().priority){
                 {
@@ -61,37 +62,44 @@ class Logger
 
     public:
         
-        static void setPriority(logPriority new_priority){
+        static void setPriority(logPriority new_priority)
+        {
             getInstance().priority = new_priority;
         }
 
         template<typename... Args>
-        static void Trace(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Trace(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Trace]||", trace, file, line, func, msg, args...);
         }
 
         template<typename... Args>
-        static void Debug(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Debug(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Debug]||", debug, file, line, func, msg, args...);
         }
 
         template<typename... Args>
-        static void Info(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Info(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Info]||", info, file, line, func, msg, args...);
         }
 
         template<typename... Args>
-        static void Warning(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Warning(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Warning]||", warning, file, line, func, msg, args...);
         }
 
         template<typename... Args>
-        static void Error(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Error(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Error]||", error, file, line, func, msg, args...);
         }
 
         template<typename... Args>
-        static void Critical(const char* file, const char* func, int line, const char* msg, Args... args){
+        static void Critical(const char* file, const char* func, int line, const char* msg, Args... args)
+        {
             log("[Critical]||", critical, file, line, func, msg, args...);
         }
 };
