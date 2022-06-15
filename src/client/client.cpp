@@ -21,7 +21,7 @@ void Client::createClient() {
         return;
 
     client.sin_family = AF_INET;
-    client.sin_port = 21;
+    client.sin_port = 8080;
     client.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int connect_socket = connect(client_socket, (struct sockaddr *) &client, sizeof(client));
@@ -29,21 +29,24 @@ void Client::createClient() {
 
 void Client::sendRequest(){
     
-    char arg[] = "test.txt";
-    std::string input;
-    std::cout << "Input" << std::endl;
-    std::getline(std::cin, input);
-    send(client_socket, input.c_str(),100, 0 );
+    while(true){
+        char arg[] = "test.txt";
+        std::string input;
+        std::cout << "Input" << std::endl;
+        std::getline(std::cin, input);
+        send(client_socket, input.c_str(),100, 0 );
+    }
+
     
     char buffer[10000];
-    recv(client_socket, buffer, 10000, 0);
-    std::cout << "Message recieved -> " << buffer << std::endl;
+    // recv(client_socket, buffer, 10000, 0);
+    // std::cout << "Message recieved -> " << buffer << std::endl;
 
-    std::ofstream file (arg, std::ofstream::out);
+    // std::ofstream file (arg, std::ofstream::out);
 
-    file.write(buffer, 10000);
+    // file.write(buffer, 10000);
 
-    file.close();
+    // file.close();
 }
 
 void Client::readCommand(){

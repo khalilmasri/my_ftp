@@ -13,12 +13,20 @@ enum logPriority{
     info        = 2, 
     warning     = 3, 
     error       = 4,
-    critical   = 5
+    critical    = 5
 };
+
+#define DEBUG_ENABLED 1
 
 #define LOG_TRACE(format...)    Logger::Trace(__FILE__, format);
 #define LOG_INFO(format...)     Logger::Info(__FILE__, format);
-#define LOG_DEBUG(format...)    Logger::Debug(__FILE__, format);
+
+#if DEBUG_ENABLED
+    #define LOG_DEBUG(format...)    Logger::Debug(__FILE__, format);
+#else
+    #define LOG_DEBUG(format...)
+#endif
+
 #define LOG_WARN(format...)     Logger::warning(__FILE__, format);
 #define LOG_ERR(format...)      Logger::Error(__FILE__, format);
 #define LOG_CRIT(format...)     Logger::Critical(__FILE__, format);

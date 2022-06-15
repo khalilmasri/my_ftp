@@ -50,27 +50,30 @@ class Ftp{
         void user_handle();
         void pass_handle();
         void pasv_handle();
+        void list_handle();
         void quit_handle();
 
         std::map<std::string, void (Ftp::*)()> dispatch_table{
             {"USER", &Ftp::user_handle},
             {"PASS", &Ftp::pass_handle},
             {"PASV", &Ftp::pasv_handle},
+            {"LIST", &Ftp::list_handle},
             {"QUIT", &Ftp::quit_handle}
         };
 
-        std::vector<std::string> commands = {"USER", "PASS", "PASV", "QUIT"};
+        std::vector<std::string> commands = {"USER", "PASS", "PASV", "LIST", "QUIT"};
 
         // Server reply and status
         std::map<int, std::string> server_reply{
-                {220 , "Service ready for new user."},
-                {221 , "Service closing."},
-                {227 , "Entering passive mode"},
-                {226 , "send ok"},
-                {230 , "User looged in, proceed."},
-                {331 , "User name okay, need a password."},
-                {332 , "Need account for login."},
-                {500 , "Syntax error, unkown command."}
+            {150 , "File status okay; about to open data connection."},
+            {220 , "Service ready for new user."},
+            {221 , "Service closing."},
+            {227 , "Entering passive mode"},
+            {226 , "send ok"},
+            {230 , "User looged in, proceed."},
+            {331 , "User name okay, need a password."},
+            {332 , "Need account for login."},
+            {500 , "Syntax error, unkown command."}
         };
 
     public:

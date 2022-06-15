@@ -56,7 +56,7 @@ void Server::run(){
 
     if (listen(server_sock, MAX_THREAD_NUMBER) < 0)
     {
-        LOG_CRIT("Try again later");
+        LOG_CRIT("Couldn't listen, Try again later");
     }
 }
 
