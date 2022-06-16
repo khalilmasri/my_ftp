@@ -132,6 +132,8 @@ void Ftp::passHandle(){
 
 void Ftp::pasvHandle(){
     
+    std::string serverIP = "127,0,0,1,";
+
     //create random number > 0 < 105 
     std::random_device rd; // obtain a random number from hardware
     std::mt19937 gen(rd()); // seed the generator
@@ -141,6 +143,10 @@ void Ftp::pasvHandle(){
 
     //print numbers
     LOG_DEBUG("P1: %d P2: %d", p1, p2);
+    std::string PASV = serverIP + std::to_string(p1) + "," + std::to_string(p2);
+    sendMsg(227, PASV);
+    
+    
 
 }
 
@@ -166,6 +172,23 @@ void Ftp::sendMsg(const int status){
 
     memset(&msg, 0, sizeof(msg)); //clear the buffer
     strcpy(msg, server_reply.at(current_state).c_str());
+    strcat(msg, "\r\n");
+
+    send(request_id, (char*)msg, sizeof(msg),0);
+}
+
+void Ftp::sendMsg(const int status, std::string address){
+
+    current_state = status;
+    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+
+    char msg[1500];
+
+    memset(&msg, 0, sizeof(msg)); //clear the buffer
+    strcpy(msg, server_reply.at(current_state).c_str());
+    strcat(msg, " (");
+    strcat(msg, address.c_str());
+    strcat(msg, ")");
     strcat(msg, "\r\n");
 
     send(request_id, (char*)msg, sizeof(msg),0);

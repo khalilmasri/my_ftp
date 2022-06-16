@@ -56,6 +56,7 @@ class Ftp{
 
         // Message sender
         void sendMsg(const int);
+        void sendMsg(const int, std::string address);
 
         // Command handlers
         void userHandle();
