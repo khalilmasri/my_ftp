@@ -131,7 +131,17 @@ void Ftp::passHandle(){
 }
 
 void Ftp::pasvHandle(){
-    LOG_DEBUG("PASV HANDLE");
+    
+    //create random number > 0 < 105 
+    std::random_device rd; // obtain a random number from hardware
+    std::mt19937 gen(rd()); // seed the generator
+    std::uniform_int_distribution<> distr(0, 105); // define the range
+    int p1 = distr(gen) + 12; // generate random number between 0-39 + 78
+    int p2 = distr(gen); // generate random number between 0-105
+
+    //print numbers
+    LOG_DEBUG("P1: %d P2: %d", p1, p2);
+
 }
 
 void Ftp::listHandle(){
