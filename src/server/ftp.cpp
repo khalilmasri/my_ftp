@@ -5,18 +5,15 @@ Ftp::Ftp(){
 
     listen_request();
 
-    LOG_DEBUG("Finished sending");
-
     close(this->request_id);
 }
 
 void Ftp::listen_request() {
 
-    LOG_DEBUG("Accept from socket => %d", server_sock);
     if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
     {
         if(!detach){
-             LOG_ERR("accept Error");
+            LOG_ERR("accept Error");
         }
         return;
     }
@@ -25,24 +22,28 @@ void Ftp::listen_request() {
     // handle_request();
 }
 
-using namespace std;
-
 void Ftp::getRequest() {
+
+    sendMsg(220);
+    int ret = 0;
 
     while(current_state != 221){
 
+
         memset(&buff, 0, sizeof(buff));//clear the buffer
-        
-        if((recv(request_id, (char*)&buff, sizeof(buff), 0)) < 0){
+        if((ret = recv(request_id, (char*)&buff, sizeof(buff), 0)) < 0){
             sendMsg(500);
             return;
         }
 
-        parseCommand();
-        handleCommand();
+        buff[ret-1] = '\0';
+        LOG_DEBUG("Got a commands %s", buff);
 
+        parseCommand();
+        handleCommand();    
+ 
         if(authorized == true){ 
-            handle_request();
+            // handle_request();
             LOG_DEBUG("Authorized");
         }
     } 
@@ -52,15 +53,24 @@ void Ftp::getRequest() {
 void Ftp::parseCommand(){
 
     std::string command = buff;
-    size_t pos = 0;
+    std::string cmd;
 
-    
-    while((pos = command.find(" ")) != std::string::npos){
-        input.push_back(command.substr(0, pos));
-        command.erase(0, pos + 1);
+    std::istringstream iss;
+    iss.str(command);
+
+    int index = 0, count = 0;
+    while(buff[index]){
+        if(buff[index] == ' '){
+            count++;
+        }
+        index++;
     }
-
-    input.push_back(command);
+    
+    count++;
+    for(int i = 0;i < count; i++){
+        iss >> cmd;
+        input.push_back(cmd);
+    }
 }
 
 void Ftp::handleCommand(){
@@ -78,32 +88,32 @@ void Ftp::handleCommand(){
     sendMsg(500);
 }
 
-void Ftp::user_handle(){
+void Ftp::userHandle(){
 
     if(input.size() > 2){
         sendMsg(500);
         return;
     }
 
-    if (*input.begin() == "Anonymous"){
+    if (*input.begin() == "anonymous"){
         sendMsg(331);
         user = *input.begin();
     } else if(*input.begin() == "admin"){
         sendMsg(331);
         user = *input.begin();
     }else {
-        sendMsg(332);
+        sendMsg(501);
     }
 }
 
-void Ftp::pass_handle(){
+void Ftp::passHandle(){
 
     if(input.size() > 2){
         sendMsg(530);
         return;
     }
 
-    if(user == "Anonymous" && *input.begin() == ""){
+    if(user == "anonymous" && *input.begin() == ""){
         sendMsg(230);
         authorized = true;
     }else if( user == "admin" && *input.begin() == "admin"){
@@ -114,15 +124,19 @@ void Ftp::pass_handle(){
     }
 }
 
-void Ftp::pasv_handle(){
+void Ftp::pasvHandle(){
     LOG_DEBUG("PASV HANDLE");
 }
 
-void Ftp::list_handle(){
+void Ftp::listHandle(){
     LOG_DEBUG("LIST HANDLE");
 }
 
-void Ftp::quit_handle(){
+void Ftp::unvalidCommand(){
+    sendMsg(502);
+}
+
+void Ftp::quitHandle(){
     LOG_DEBUG("QUIT");
     sendMsg(221);
 }
@@ -136,6 +150,7 @@ void Ftp::sendMsg(const int status){
 
     memset(&msg, 0, sizeof(msg)); //clear the buffer
     strcpy(msg, server_reply.at(current_state).c_str());
+    strcat(msg, "\r\n");
 
     send(request_id, (char*)msg, sizeof(msg),0);
 }

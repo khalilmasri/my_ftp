@@ -31,9 +31,9 @@ void Server::createServerSock(){
 
     int optval = 1;
 
-    this->server_address.sin_port = server_port;
+    this->server_address.sin_port = htons(server_port);
     this->server_address.sin_family = AF_INET;
-    this->server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     
     if(setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR,&optval,sizeof(int)) < 0){
