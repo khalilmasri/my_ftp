@@ -160,7 +160,21 @@ void Ftp::pasvHandle(){
 }
 
 void Ftp::listHandle(){
-    LOG_DEBUG("LIST HANDLE");
+    
+    if((dir = opendir(filePath.c_str())) == NULL){
+        LOG_ERR("Couldn't find directory");
+    }
+
+    while((current_dir = readdir(dir)) != NULL){
+        std::string name = current_dir->d_name;
+        if(name != "." && name != ".."){
+            file_list.push_back(name);
+        }
+    }
+    
+    for (auto it : file_list){
+        sendMsg(150, it);
+    }
 }
 
 void Ftp::unvalidCommand(){
@@ -183,7 +197,7 @@ void Ftp::sendMsg(const int status){
     strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, "\r\n");
 
-    send(request_id, (char*)msg, sizeof(msg),0);
+    send(request_id, (char*)msg, strlen(msg),0);
 }
 
 void Ftp::sendMsg(const int status, std::string address){
@@ -200,7 +214,7 @@ void Ftp::sendMsg(const int status, std::string address){
     strcat(msg, ")");
     strcat(msg, "\r\n");
 
-    send(request_id, (char*)msg, sizeof(msg),0);
+    send(request_id, (char*)msg, strlen(msg),0);
 }
 
 void Ftp::handle_request(){
