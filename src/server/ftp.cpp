@@ -148,7 +148,11 @@ void Ftp::pasvHandle(){
     LOG_DEBUG("P1: %d P2: %d", p1, p2);
     std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
     sendMsg(227, PASV);
-    
+
+    // handle the authentication like this just then break into other methods to handle the data transfer?
+    // userHandle();
+    // passHandle();
+
 }
 
 void Ftp::listHandle(){
