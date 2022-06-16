@@ -28,6 +28,7 @@ class Ftp{
         int server_sock;
         int port;
         std::string filePath;
+        int dataPort;
 
         // Origin client details
         int request_id;

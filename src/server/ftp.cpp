@@ -142,16 +142,20 @@ void Ftp::pasvHandle(){
     //create random number > 0 < 105 
     std::random_device rd; // obtain a random number from hardware
     std::mt19937 gen(rd()); // seed the generator
-    std::uniform_int_distribution<> distr(0, 105); // define the range
-    int p1 = distr(gen) + 12; // generate random number between 0-39 + 78
-    int p2 = distr(gen); // generate random number between 0-105
+    std::uniform_int_distribution<> distr(20000, 30000); // define the range
+    int p1 = distr(gen);
+    int p2 = p1;
+    p1 = p2 / 256;
+    p2 = p2 % 256;
+
     LOG_DEBUG("P1: %d P2: %d", p1, p2);
     std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
     sendMsg(227, PASV);
 
-    // handle the authentication like this just then break into other methods to handle the data transfer?
-    // userHandle();
-    // passHandle();
+    int dataPort = p1 * 256 + p2;
+    sendMsg(220, std::to_string(dataPort));
+
+    
 
 }
 
