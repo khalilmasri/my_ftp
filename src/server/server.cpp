@@ -68,6 +68,10 @@ void Server::setFilePath(std::string file_path){
     this->file_path = file_path;
 }
 
+std::string Server::getServerIP(){
+    return inet_ntoa(this->server_address.sin_addr);
+}
+
 int Server::getServerPort(){
     return this->server_port;
 }

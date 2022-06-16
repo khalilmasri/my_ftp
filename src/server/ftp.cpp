@@ -131,8 +131,13 @@ void Ftp::passHandle(){
 }
 
 void Ftp::pasvHandle(){
-    
-    std::string serverIP = "127,0,0,1,";
+
+
+    //get server ip from server class
+    Server* server = Server::getInstance();
+    std::string server_ip = server->getServerIP();
+    std::replace(server_ip.begin(), server_ip.end(), '.', ',');
+    server_ip += ',';
 
     //create random number > 0 < 105 
     std::random_device rd; // obtain a random number from hardware
@@ -140,14 +145,10 @@ void Ftp::pasvHandle(){
     std::uniform_int_distribution<> distr(0, 105); // define the range
     int p1 = distr(gen) + 12; // generate random number between 0-39 + 78
     int p2 = distr(gen); // generate random number between 0-105
-
-    //print numbers
     LOG_DEBUG("P1: %d P2: %d", p1, p2);
-    std::string PASV = serverIP + std::to_string(p1) + "," + std::to_string(p2);
+    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
     sendMsg(227, PASV);
     
-    
-
 }
 
 void Ftp::listHandle(){

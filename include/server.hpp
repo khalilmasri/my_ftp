@@ -43,6 +43,7 @@ class Server{
 
         // GETTERS
         std::string getFilePath();
+        std::string getServerIP();
         int getServerPort();
         int getServerSocket();
         
