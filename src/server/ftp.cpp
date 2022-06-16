@@ -3,6 +3,12 @@
 
 Ftp::Ftp(){
 
+    Server* server = Server::getInstance();
+    server_sock = server->getServerSocket();
+    port = server->getServerPort();
+    filePath = server->getFilePath();
+
+    LOG_DEBUG("Socket => %d port => %d Path => %s", server_sock, port, filePath.c_str());
     listen_request();
 
     close(this->request_id);

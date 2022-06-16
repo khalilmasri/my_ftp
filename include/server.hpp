@@ -18,28 +18,43 @@
 
 #define ERROR_SOCKET -3
 
-extern int server_sock;
 
 class Server{
 
     private: 
         struct sockaddr_in server_address;
         void createServerSock();
-        void setFilePath(std::string);
-        void setServerPort(std::string);
 
+        static Server server_instance;
         int server_port;
         std::string file_path;
+        int server_sock;
         
     public:
+        Server();
         Server(std::string, std::string);
         Server& operator = (const Server&);
         ~Server();
 
         // METHODS
         void run();
+        void Start();
         void closeServer();
+
+        // GETTERS
+        std::string getFilePath();
+        int getServerPort();
+        int getServerSocket();
+        
+        static Server* getInstance(){
+            return &server_instance;
+        }
+
+        // SETTERS
+        void setFilePath(std::string);
+        void setServerPort(std::string);
 };
 
+extern Server server;
 
 #endif

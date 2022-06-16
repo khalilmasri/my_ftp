@@ -1,18 +1,14 @@
 #include "server.hpp"
 #include "logger.hpp"
 
-int server_sock;
+Server Server::server_instance;
 
-Server::Server(const std::string port, const std::string filePath) {
-
-    setServerPort(port);
-    setFilePath(filePath);
-
-    LOG_INFO("Initiating server with port [%d] and file path [%s]", this->server_port, this->file_path.c_str());
-
-    createServerSock();
-    run();
+Server::Server(){
+    server_port = 0;
+    server_sock = 0;
+    file_path = "";
 }
+
 
 Server& Server::operator = (const Server& rhs){
     (void)rhs;
@@ -21,6 +17,13 @@ Server& Server::operator = (const Server& rhs){
 
 Server::~Server(){};
 
+void Server::Start() {
+
+    LOG_INFO("Initiating server with port [%d] and file path [%s]", this->server_port, this->file_path.c_str());
+
+    createServerSock();
+    run();
+}
 
 void Server::createServerSock(){
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -63,6 +66,18 @@ void Server::setServerPort(const std::string port){
 
 void Server::setFilePath(std::string file_path){
     this->file_path = file_path;
+}
+
+int Server::getServerPort(){
+    return this->server_port;
+}
+
+int Server::getServerSocket(){
+    return this->server_sock;
+}
+
+std::string Server::getFilePath(){
+    return this->file_path;
 }
 
 void Server::run(){

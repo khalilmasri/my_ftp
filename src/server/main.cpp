@@ -29,7 +29,10 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-    Server server(argv[1], argv[2]);
+    Server* server = Server::getInstance();
+    server->setServerPort(argv[1]);
+    server->setFilePath(argv[2]);
+    server->Start();
     
     // CREATING THREADPOOL AND STARTING TO LOOK FOR JOBS
     ThreadPool thread_pool;
@@ -50,7 +53,7 @@ int main(int argc, char** argv){
     thread_pool.Stop();  
 
     // DISCONNECTS THE SERVER
-    server.closeServer();
-
+    server->closeServer();
+    
     return 0;
 }

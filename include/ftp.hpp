@@ -15,7 +15,7 @@
 
 #include "server.hpp"
 
-extern int server_sock;
+extern Server server;
 extern bool detach;
 
 #define MAX_TRANSMISSION_LENGTH 1500
@@ -23,6 +23,11 @@ extern bool detach;
 class Ftp{
 
     private:
+        
+        // SERVER DETAILS
+        int server_sock;
+        int port;
+        std::string filePath;
 
         // Origin client details
         int request_id;
@@ -38,7 +43,7 @@ class Ftp{
         // User data
         std::string user;
         std::string pass;
-
+        
         // Request handlers
         void listen_request();
         void getRequest();
