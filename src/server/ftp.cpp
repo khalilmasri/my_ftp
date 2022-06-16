@@ -119,7 +119,7 @@ void Ftp::passHandle(){
         return;
     }
 
-    if(user == "anonymous" && *input.begin() == ""){
+    if(user == "anonymous"){
         sendMsg(230);
         authorized = true;
     }else if( user == "admin" && *input.begin() == "admin"){
@@ -154,8 +154,6 @@ void Ftp::pasvHandle(){
 
     int dataPort = p1 * 256 + p2;
     sendMsg(220, std::to_string(dataPort));
-
-    
 
 }
 

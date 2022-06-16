@@ -81,7 +81,6 @@ class Ftp{
                 {"PASS", &Ftp::passHandle},
                 {"PASV", &Ftp::pasvHandle},
                 {"LPRT", &Ftp::listHandle},
-                {"LIST", &Ftp::listHandle},
                 {"QUIT", &Ftp::quitHandle}
         };
 
