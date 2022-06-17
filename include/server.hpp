@@ -1,12 +1,13 @@
 #ifndef FTP_SERVER
 #define FTP_SERVER
 
+
 // LIBRARIES
 #include <list>
 #include <netinet/in.h>
 #include <sys/socket.h>
 //#include <sys/types.h>
-#include <arpa/inet.h>
+#include  <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
 #include <iostream>
@@ -18,40 +19,42 @@
 
 #define ERROR_SOCKET -3
 
-class Server
-{
 
-private:
-    struct sockaddr_in server_address;
-    void createServerSock();
+class Server{
 
-    static Server server_instance;
-    int server_port;
-    std::string file_path;
-    int server_sock;
+    private: 
+        struct sockaddr_in server_address;
+        void createServerSock();
 
-public:
-    Server();
-    Server(std::string, std::string);
-    Server &operator=(const Server &);
-    ~Server();
+        static Server server_instance;
+        int server_port;
+        std::string file_path;
+        int server_sock;
+        
+    public:
+        Server();
+        Server(std::string, std::string);
+        Server& operator = (const Server&);
+        ~Server();
 
-    // METHODS
-    void run();
-    void Start();
-    void closeServer();
+        // METHODS
+        void run();
+        void Start();
+        void closeServer();
 
-    // GETTERS
-    std::string getFilePath();
-    std::string getServerIP();
-    int getServerPort();
-    int getServerSocket();
+        // GETTERS
+        std::string getFilePath();
+        std::string getServerIP();
+        int getServerPort();
+        int getServerSocket();
+        
+        static Server* getInstance(){
+            return &server_instance;
+        }
 
-    static Server *getInstance() {return &server_instance;}
-
-    // SETTERS
-    void setFilePath(std::string);
-    void setServerPort(std::string);
+        // SETTERS
+        void setFilePath(std::string);
+        void setServerPort(std::string);
 };
 
 extern Server server;

@@ -16,7 +16,6 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
-
 #include "server.hpp"
 
 extern Server server;
@@ -29,9 +28,8 @@ class Ftp{
         // SERVER DETAILS
         int server_sock;
         int port;
-        std::string path;
+        std::string filePath;
         int dataPort;
-
 
         // Origin client details
         int request_id;
