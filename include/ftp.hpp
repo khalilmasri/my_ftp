@@ -17,7 +17,6 @@
 #include <dirent.h>
 #include <unistd.h>
 
-
 #include "server.hpp"
 
 extern Server server;
@@ -30,8 +29,9 @@ class Ftp{
         // SERVER DETAILS
         int server_sock;
         int port;
-        std::string filePath;
+        std::string path;
         int dataPort;
+
 
         // Origin client details
         int request_id;
@@ -65,41 +65,49 @@ class Ftp{
 
         // Message sender
         void sendMsg(const int);
-        void sendMsg(const int, std::string address);
+        void sendMsg(const int, std::string info);
 
         // Command handlers
         void userHandle();
         void passHandle();
         void pasvHandle();
+        void getpwdHandle();
+        void getcwdHandle();
+        void getcdupHandle();
         void listHandle();
         void unvalidCommand();
         void quitHandle();
 
         std::map<std::string, void (Ftp::*)()> dispatch_table{
             {"USER", &Ftp::userHandle},
-                {"SYST", &Ftp::unvalidCommand},
-                {"PASS", &Ftp::passHandle},
-                {"PASV", &Ftp::pasvHandle},
-                {"LPRT", &Ftp::listHandle},
-                {"QUIT", &Ftp::quitHandle}
+            {"SYST", &Ftp::unvalidCommand},
+            {"PASS", &Ftp::passHandle},
+            {"PASV", &Ftp::pasvHandle},
+            {"PWD", &Ftp::getpwdHandle},
+            {"CWD", &Ftp::getcwdHandle},
+            {"CDUP", &Ftp::getcdupHandle},
+            {"LS", &Ftp::listHandle},
+            {"QUIT", &Ftp::quitHandle}
         };
 
-        std::vector<std::string> commands = {"USER", "PASS", "PASV", "LIST", "LPRT", "SYST", "QUIT"};
+        std::vector<std::string> commands = {"USER", "PWD", "CDUP", "CWD", "PASS", "PASV", "LS", "LPRT", "SYST", "QUIT"};
 
         // Server reply and status
         std::map<int, std::string> server_reply{
             {150 , "150 - File status okay; about to open data connection."},
-                {220 , "220 - Service ready for new user."},
-                {221 , "221 - Service closing."},
-                {226 , "226 - send ok"},
-                {227 , "227 - Entering passive mode"},
-                {230 , "230 - User logged in successfully."},
-                {331 , "331 - User name okay, need a password."},
-                {332 , "332 - Need account for login."},
-                {500 , "500 - Syntax error, unkown command."},
-                {501 , "501 - Syntax error in parameters or arguments."},
-                {502 , "502 - Command not implemented."},
-                {530 , "530 - User password is wrong, didn't login."}
+            {220 , "220 - Service ready for new user."},
+            {221 , "221 - Service closing."},
+            {226 , "226 - send ok"},
+            {227 , "227 - Entering passive mode"},
+            {230 , "230 - User logged in successfully."},
+            {250 , "250 - Requested file action okay, completed."},
+            {331 , "331 - User name okay, need a password."},
+            {332 , "332 - Need account for login."},
+            {500 , "500 - Syntax error, unkown command."},
+            {501 , "501 - Syntax error in parameters or arguments."},
+            {502 , "502 - Command not implemented."},
+            {530 , "530 - User password is wrong, didn't login."},
+            {550 , "550 - Requested action not taken. File unavailable."}
         };
 
     public:
