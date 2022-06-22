@@ -133,8 +133,44 @@ void Request::pasvHandle(){
     int dataPort = p1 * 256 + p2;
     sendMsg(220, std::to_string(dataPort));
 
-    
+}
 
+void Request::getpwdHandle()
+{
+    char pwd[MAX_PATH];
+    getcwd(pwd, MAX_PATH);
+    sendMsg(250, pwd);
+}
+
+void Request::getcwdHandle()
+{
+    if (input.size() > 2)
+    {
+        sendMsg(500);
+        return;
+    }
+
+    std::string cwd = *input.begin();
+    if (cwd == ".."){
+        getcdupHandle();
+        return;
+    } else if (chdir(cwd.c_str()) == 0)
+    {
+        sendMsg(250, cwd);
+    } else
+        sendMsg(550);
+}
+
+void Request::getcdupHandle(){
+    char cwd[200];
+    getcwd(cwd, 100);
+    int i = strlen(cwd);
+    while(cwd[i] != '/'){
+        i--;
+    }
+    cwd[i] = '\0';
+    chdir(cwd);
+    sendMsg(250, cwd);
 }
 
 void Request::listHandle(){
@@ -150,9 +186,11 @@ void Request::listHandle(){
         }
     }
     
+    std::string list = "\n";
     for (auto it : file_list){
-        sendMsg(150, it);
+        list = list + it + "\n";
     }
+    sendMsg(150, list);
 }
 
 void Request::unvalidCommand(){

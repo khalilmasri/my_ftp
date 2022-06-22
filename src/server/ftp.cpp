@@ -3,6 +3,9 @@
 #include "request.hpp"
 
 
+//static passive_mode
+static bool passive_mode = false;
+
 Ftp::Ftp(){
 
     Server* server = Server::getInstance();
