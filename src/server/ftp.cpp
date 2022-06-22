@@ -1,5 +1,7 @@
 #include "ftp.hpp"
 #include "logger.hpp"
+#include "request.hpp"
+
 
 Ftp::Ftp(){
 
@@ -10,6 +12,8 @@ Ftp::Ftp(){
 
     LOG_DEBUG("Socket => %d port => %d Path => %s", server_sock, port, filePath.c_str());
     listen_request();
+
+        LOG_DEBUG("Out here");
 
     close(this->request_id);
 }
@@ -24,210 +28,54 @@ void Ftp::listen_request() {
         return;
     }
 
-    getRequest();
-    // handle_request();
-}
-
-void Ftp::getRequest() {
-
-    sendMsg(220);
-    int ret = 0;
-
-    while(current_state != 221){
-
-
-        memset(&buff, 0, sizeof(buff));//clear the buffer
-        if((ret = recv(request_id, (char*)&buff, sizeof(buff), 0)) < 0){
-            sendMsg(500);
-            return;
-        }
-
-        buff[ret-1] = '\0';
-        LOG_DEBUG("Got a commands %s", buff);
-
-        parseCommand();
-        handleCommand();    
- 
-        if(authorized == true){ 
-            // handle_request();
-            LOG_DEBUG("Authorized");
-        }
-    } 
+    LOG_DEBUG("Creating request");
+    Request request;
+    request.handle();
+    LOG_DEBUG("Out here");
 
 }
 
-void Ftp::parseCommand(){
 
-    std::string command = buff;
-    std::string cmd;
-
-    std::istringstream iss;
-    iss.str(command);
-
-    int index = 0, count = 0;
-    while(buff[index]){
-        if(buff[index] == ' '){
-            count++;
-        }
-        index++;
-    }
-    
-    count++;
-    for(int i = 0;i < count; i++){
-        iss >> cmd;
-        input.push_back(cmd);
-    }
+int Ftp::getServerSock() const{
+    return this->server_sock;
 }
 
-void Ftp::handleCommand(){
-
-    for( auto it : commands){
-        if(it == *input.begin()){
-            input.erase(input.begin());
-            (*this.*dispatch_table.at(it))();
-            input.clear();
-            return;
-        }
-    } 
-    
-    input.clear();
-    sendMsg(500);
+int Ftp::getServerPort() const{
+    return this->port;
 }
 
-void Ftp::userHandle(){
-
-    if(input.size() > 2){
-        sendMsg(500);
-        return;
-    }
-
-    if (*input.begin() == "anonymous"){
-        sendMsg(331);
-        user = *input.begin();
-    } else if(*input.begin() == "admin"){
-        sendMsg(331);
-        user = *input.begin();
-    }else {
-        sendMsg(501);
-    }
+std::string Ftp::getFilePath() const{
+    return this->filePath;
 }
 
-void Ftp::passHandle(){
-
-    if(input.size() > 2){
-        sendMsg(530);
-        return;
-    }
-
-    if(user == "anonymous" && *input.begin() == ""){
-        sendMsg(230);
-        authorized = true;
-    }else if( user == "admin" && *input.begin() == "admin"){
-        sendMsg(230);
-        authorized = true;
-    }else{
-        sendMsg(530);
-    }
+int Ftp::getDataPort() const{
+    return this->dataPort;
 }
 
-void Ftp::pasvHandle(){
-
-
-    //get server ip from server class
-    Server* server = Server::getInstance();
-    std::string server_ip = server->getServerIP();
-    std::replace(server_ip.begin(), server_ip.end(), '.', ',');
-    server_ip += ',';
-
-    //create random number > 0 < 105 
-    std::random_device rd; // obtain a random number from hardware
-    std::mt19937 gen(rd()); // seed the generator
-    std::uniform_int_distribution<> distr(20000, 30000); // define the range
-    int p1 = distr(gen);
-    int p2 = p1;
-    p1 = p2 / 256;
-    p2 = p2 % 256;
-
-    LOG_DEBUG("P1: %d P2: %d", p1, p2);
-    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
-    sendMsg(227, PASV);
-
-    int dataPort = p1 * 256 + p2;
-    sendMsg(220, std::to_string(dataPort));
-
-    
-
+int Ftp::getRequestID() const{
+    return this->request_id;
 }
 
-void Ftp::listHandle(){
-    
-    if((dir = opendir(filePath.c_str())) == NULL){
-        LOG_ERR("Couldn't find directory");
-    }
-
-    while((current_dir = readdir(dir)) != NULL){
-        std::string name = current_dir->d_name;
-        if(name != "." && name != ".."){
-            file_list.push_back(name);
-        }
-    }
-    
-    for (auto it : file_list){
-        sendMsg(150, it);
-    }
+bool Ftp::getAuth() const{
+    return this->authorized;
 }
 
-void Ftp::unvalidCommand(){
-    sendMsg(502);
+void Ftp::setUser(const std::string user){
+    this->user = user;
 }
 
-void Ftp::quitHandle(){
-    LOG_DEBUG("QUIT");
-    sendMsg(221);
+void Ftp::setPass(const std::string pass){
+    this->pass = pass;
 }
 
-void Ftp::sendMsg(const int status){
-
-    current_state = status;
-    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
-
-    char msg[1500];
-
-    memset(&msg, 0, sizeof(msg)); //clear the buffer
-    strcpy(msg, server_reply.at(current_state).c_str());
-    strcat(msg, "\r\n");
-
-    send(request_id, (char*)msg, strlen(msg),0);
+void Ftp::setAuth(const bool authorized){
+    this->authorized = authorized;
 }
 
-void Ftp::sendMsg(const int status, std::string address){
-
-    current_state = status;
-    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
-
-    char msg[1500];
-
-    memset(&msg, 0, sizeof(msg)); //clear the buffer
-    strcpy(msg, server_reply.at(current_state).c_str());
-    strcat(msg, " (");
-    strcat(msg, address.c_str());
-    strcat(msg, ")");
-    strcat(msg, "\r\n");
-
-    send(request_id, (char*)msg, strlen(msg),0);
+std::string Ftp::getUser() const{
+    return this->user;
 }
 
-void Ftp::handle_request(){
-
-    std::ifstream file (buff, std::ifstream::in);
-
-    char message[MAX_TRANSMISSION_LENGTH];
-
-    file.read(message, MAX_TRANSMISSION_LENGTH);
-
-    send(request_id, message, MAX_TRANSMISSION_LENGTH, 0);
-
-    file.close();
+std::string Ftp::getPass() const{
+    return this->pass;
 }
-
-

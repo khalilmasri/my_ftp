@@ -20,6 +20,7 @@
 #include "ftp.hpp"
 #include "threadPool.hpp"
 #include "logger.hpp"
+#include "request.hpp"
 
 int main(int argc, char** argv){
 
@@ -45,7 +46,9 @@ int main(int argc, char** argv){
         // AND THE THE THREADPOOL IS NOT BUSY
         if(thread_pool.busy()){
             // CREATE A CLIENT AND WAIT FOR A REQUEST TO BE SENT
-            thread_pool.QueueJob([]{Ftp request;});
+            thread_pool.QueueJob([]{
+                Ftp ftp_com;
+                Request request;});
         }
     }
     
