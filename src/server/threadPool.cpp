@@ -10,7 +10,8 @@ ThreadPool::ThreadPool() {
 ThreadPool::~ThreadPool(){}
 
 void ThreadPool::Start() {
-    const uint32_t num_threads = std::thread::hardware_concurrency();  // Max # of threads the system supports
+    num_threads = std::thread::hardware_concurrency();  // Max # of threads the system supports
+    available_threads = num_threads;
     threads.resize(num_threads);
 
     LOG_INFO("Creating thread pool...");
@@ -23,12 +24,14 @@ void ThreadPool::Start() {
         }
     }
 
+    LOG_DEBUG("Created %d threads", num_threads);
     LOG_INFO("Thread pool is ready!");
 }
 
 void ThreadPool::exit_listener() {
 
     std::string command;
+    this->available_threads -= 1;
     while(command != "exit"){
         std::getline(std::cin, command);
     }
@@ -65,6 +68,7 @@ void ThreadPool::ThreadLoop() {
 void ThreadPool::QueueJob(const std::function<void()>& job) {
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
+        available_threads-=1;
         jobs.push(job);
     }
     mutex_condition.notify_one();
@@ -76,7 +80,7 @@ bool ThreadPool::busy() {
         std::unique_lock<std::mutex> lock(queue_mutex);
         poolbusy = jobs.empty();
     }
-    return poolbusy;
+    return !poolbusy;
 }
 
 void ThreadPool::Stop() {
@@ -93,4 +97,12 @@ void ThreadPool::Stop() {
     }
     threads.clear();
     LOG_INFO("All threads are closed!");
+}
+
+int ThreadPool::getAvailableThreads(){
+    return this->available_threads;
+}
+
+int ThreadPool::getNumThreads(){
+    return this->num_threads;
 }

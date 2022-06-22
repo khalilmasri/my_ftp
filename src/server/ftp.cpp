@@ -1,6 +1,5 @@
 #include "ftp.hpp"
 #include "logger.hpp"
-#include "request.hpp"
 
 
 //static passive_mode
@@ -14,28 +13,19 @@ Ftp::Ftp(){
     filePath = server->getFilePath();
 
     LOG_DEBUG("Socket => %d port => %d Path => %s", server_sock, port, filePath.c_str());
-    listen_request();
-
-        LOG_DEBUG("Out here");
-
-    close(this->request_id);
 }
 
-void Ftp::listen_request() {
+bool Ftp::listen_request() {
 
     if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
     {
         if(!detach){
             LOG_ERR("accept Error");
         }
-        return;
+        return false;
     }
 
-    LOG_DEBUG("Creating request");
-    Request request;
-    request.handle();
-    LOG_DEBUG("Out here");
-
+    return true;
 }
 
 

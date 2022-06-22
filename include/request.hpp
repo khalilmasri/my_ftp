@@ -23,7 +23,15 @@
 class Request : public Ftp {
     private:
 
+        Ftp ftp_com;
+
+        // Client data transfer
+        int data_port;
+        std::string data_ip;
+        int data_socket;
+
         int current_state = 0;
+        bool passive_mode = false;
 
         char buff[MAX_TRANSMISSION_LENGTH];
 
@@ -36,12 +44,14 @@ class Request : public Ftp {
         // Message sender
         void sendMsg(const int);
         void sendMsg(const int, std::string address);
+        void sendData(const int, std::string data);
 
         // Command handlers
         void userHandle();
         void passHandle();
         void pasvHandle();
         void listHandle();
+        void portHandle();
         void getpwdHandle();
         void getcwdHandle();
         void getcdupHandle();
@@ -61,6 +71,7 @@ class Request : public Ftp {
             {"CWD", &Request::getcwdHandle},
             {"CDUP", &Request::getcdupHandle},
             {"PASV", &Request::pasvHandle},
+            {"PORT", &Request::portHandle},
             {"LPRT", &Request::listHandle},
             {"LIST", &Request::listHandle},
             {"QUIT", &Request::quitHandle}
@@ -72,8 +83,8 @@ class Request : public Ftp {
             "PWD",
             "CDUP",
             "CWD",
-            "LS",
             "LPRT",
+            "PORT",
             "PASV", 
             "LIST", 
             "LPRT", 
@@ -84,6 +95,7 @@ class Request : public Ftp {
         // Server reply and status
             std::map<int, std::string> server_reply{
             {150 , "150 - File status okay; about to open data connection."},
+            {200 , "200 - Command okay."},
             {220 , "220 - Service ready for new user."},
             {221 , "221 - Service closing."},
             {226 , "226 - send ok"},
@@ -100,6 +112,7 @@ class Request : public Ftp {
         };
 
     public:
+        Request(Ftp&);
         ~Request();
 
         void handle();

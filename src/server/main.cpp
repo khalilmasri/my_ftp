@@ -44,11 +44,16 @@ int main(int argc, char** argv){
     while(thread_pool.getExit() == false){
 
         // AND THE THE THREADPOOL IS NOT BUSY
-        if(thread_pool.busy()){
+        if(!thread_pool.busy()){
             // CREATE A CLIENT AND WAIT FOR A REQUEST TO BE SENT
-            thread_pool.QueueJob([]{
-                Ftp ftp_com;
-                Request request;});
+            if(thread_pool.getAvailableThreads() > thread_pool.getNumThreads() / 2){
+                thread_pool.QueueJob([]{
+                    Ftp ftp_com;
+                    if(ftp_com.listen_request() == true){
+                        Request request(ftp_com);
+                        request.handle();
+                    }});
+            }
         }
     }
     

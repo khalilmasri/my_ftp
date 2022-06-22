@@ -22,13 +22,16 @@ public:
     void MainThread();
     void exit_listener();
     bool getExit();
+    int getAvailableThreads();
+    int getNumThreads();
 
 private:
     void ThreadLoop();
 
     bool Exit = false;
-    size_t THREADS_NUM;
+    int num_threads;
     bool should_terminate = false;           // Tells threads to stop looking for jobs
+    int available_threads;
     std::vector<int> thread_ID;
     std::mutex queue_mutex;                  // Prevents data races to the job queue
     std::condition_variable mutex_condition; // Allows threads to wait on new jobs or termination 

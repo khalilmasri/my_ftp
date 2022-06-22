@@ -1,20 +1,21 @@
 #include "request.hpp"
 #include "logger.hpp"
 
+Request::Request(Ftp &ftp_com){
+    this->ftp_com = ftp_com;
+}
+
 Request::~Request(){};
 
 void Request::handle(){
-
-        std::cout << "Here\n";
 
     sendMsg(220);
     int ret = 0;
 
     while(current_state != 221){
 
-
         memset(&buff, 0, sizeof(buff));//clear the buffer
-        if((ret = recv(getRequestID(), (char*)&buff, sizeof(buff), 0)) < 0){
+        if((ret = recv(ftp_com.getRequestID(), (char*)&buff, sizeof(buff), 0)) < 0){
             sendMsg(500);
             return;
         }
@@ -25,9 +26,8 @@ void Request::handle(){
         parseCommand();
         handleCommand();    
  
-        if(getAuth() == true){ 
+        if(ftp_com.getAuth() == true){ 
             // handle_request();
-            LOG_DEBUG("Authorized");
         }
     } 
 }
@@ -79,10 +79,10 @@ void Request::userHandle(){
 
     if (*input.begin() == "anonymous"){
         sendMsg(331);
-        setUser(*input.begin());
+        ftp_com.setUser(*input.begin());
     } else if(*input.begin() == "admin"){
         sendMsg(331);
-        setUser(*input.begin());
+        ftp_com.setUser(*input.begin());
     }else {
         sendMsg(501);
     }
@@ -95,21 +95,23 @@ void Request::passHandle(){
         return;
     }
 
-    if(getUser() == "anonymous" && *input.begin() == ""){
+    if(ftp_com.getUser() == "anonymous"){
         sendMsg(230);
-        setPass(*input.begin());
-        setAuth(true);
-    }else if( getUser() == "admin" && *input.begin() == "admin"){
+        ftp_com.setPass(*input.begin());
+        ftp_com.setAuth(true);
+    }else if( ftp_com.getUser() == "admin" && *input.begin() == "admin"){
         sendMsg(230);
-        setPass(*input.begin());
-        setAuth(true);
+        ftp_com.setPass(*input.begin());
+        ftp_com.setAuth(true);
     }else{
         sendMsg(530);
+        return;
     }
+    
+    LOG_DEBUG("Authorized");
 }
 
 void Request::pasvHandle(){
-
 
     //get server ip from server class
     Server* server = Server::getInstance();
@@ -175,7 +177,7 @@ void Request::getcdupHandle(){
 
 void Request::listHandle(){
     
-    if((dir = opendir(getFilePath().c_str())) == NULL){
+    if((dir = opendir(ftp_com.getFilePath().c_str())) == NULL){
         LOG_ERR("Couldn't find directory");
     }
 
@@ -190,7 +192,7 @@ void Request::listHandle(){
     for (auto it : file_list){
         list = list + it + "\n";
     }
-    sendMsg(150, list);
+    sendData(150, list);
 }
 
 void Request::unvalidCommand(){
@@ -213,7 +215,7 @@ void Request::sendMsg(const int status){
     strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, "\r\n");
 
-    send(getRequestID(), (char*)msg, strlen(msg),0);
+    send(ftp_com.getRequestID(), (char*)msg, strlen(msg),0);
 }
 
 void Request::sendMsg(const int status, std::string address){
@@ -230,18 +232,84 @@ void Request::sendMsg(const int status, std::string address){
     strcat(msg, ")");
     strcat(msg, "\r\n");
 
-    send(getRequestID(), (char*)msg, strlen(msg),0);
+    send(ftp_com.getRequestID(), (char*)msg, strlen(msg),0);
+}
+
+void Request::sendData(const int status, std::string data){
+
+    current_state = status;
+    std::cout << data << std::endl;
+    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+
+    char msg[1500];
+
+    memset(&msg, 0, sizeof(msg)); //clear the buffer
+    strcpy(msg, server_reply.at(current_state).c_str());
+    strcat(msg, " (");
+    strcat(msg, data.c_str());
+    strcat(msg, ")");
+    strcat(msg, "\r\n");
+
+    send(this->data_socket, (char*)msg, strlen(msg),0);
+
+}
+
+void Request::portHandle(){
+
+    std::string deli = ",";
+    int pos = 0;
+    int index = 0;
+    this->data_ip = "";
+    std::string digit = "";
+    std::string full_ip = *input.begin();
+
+    std::cout << full_ip << std::endl;
+    while((pos = full_ip.find(deli)) != std::string::npos){
+        digit = full_ip.substr(0, pos);
+        full_ip.erase(0, pos + deli.length());
+
+        if(index < 3){
+            this->data_ip += digit;
+            this->data_ip += deli;
+        }else if(index == 3){
+            this->data_ip += digit;
+        }else{
+            if(index == 4){
+                this->data_port = std::stoi(digit) * 256;
+            }
+        }
+
+        index++;
+    }
+
+    digit = full_ip.substr(0, pos);
+    this->data_port += std::stoi(digit);
+
+    LOG_DEBUG("Data IP => %s", this->data_ip.c_str());
+    LOG_DEBUG("Data Port => %d", this->data_port);
+
+    handle_request();
+
+    sendMsg(200);
 }
 
 void Request::handle_request(){
 
-    std::ifstream file (buff, std::ifstream::in);
+    struct sockaddr_in data_address;
 
-    char message[MAX_TRANSMISSION_LENGTH];
+    if ((data_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        LOG_CRIT("socket error");
+        exit(1);
+    }
 
-    file.read(message, MAX_TRANSMISSION_LENGTH);
+    int optval = 1;
 
-    send(getRequestID(), message, MAX_TRANSMISSION_LENGTH, 0);
+    data_address.sin_port = htons(this->data_port);
+    data_address.sin_family = AF_INET;
+    data_address.sin_addr.s_addr = inet_addr(this->data_ip.c_str());
 
-    file.close();
+    int status = connect(data_socket,
+                         (sockaddr*) &data_address, sizeof(data_address));
+
 }
