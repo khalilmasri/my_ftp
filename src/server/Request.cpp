@@ -254,8 +254,7 @@ void Request::sendMsg(const int status)
     send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
 
-void Request::sendMsg(const int status, std::string address)
-{
+void Request::sendMsg(const int status, std::string data) {
 
     current_state = status;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
@@ -265,7 +264,7 @@ void Request::sendMsg(const int status, std::string address)
     memset(&msg, 0, sizeof(msg)); // clear the buffer
     strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, " (");
-    strcat(msg, address.c_str());
+    strcat(msg, data.c_str());
     strcat(msg, ")");
     strcat(msg, "\r\n");
 
@@ -281,7 +280,7 @@ void Request::sendData(const int status, std::string data)
     char msg[1500];
 
     memset(&msg, 0, sizeof(msg)); // clear the buffer
-    strcpy(msg, server_reply.at(current_state).c_str());
+    // strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, data.c_str());
     strcat(msg, "\r\n");
 
