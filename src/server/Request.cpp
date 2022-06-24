@@ -20,12 +20,13 @@ void Request::handle()
         memset(&buff, 0, sizeof(buff)); // clear the buffer
         if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
         {
-            sendMsg(500);
+
+            sendMsg(500, "handle() error!");
             return;
         }
 
         buff[ret - 1] = '\0';
-        LOG_DEBUG("Got a commands %s", buff);
+        LOG_DEBUG("Got command: %s", buff);
 
         parseCommand();
         handleCommand();
@@ -74,7 +75,7 @@ void Request::handleCommand()
     }
 
     input.clear();
-    sendMsg(500);
+    sendMsg(500, "HANDLE_COMMAND() error!");
 }
 
 void Request::userHandle()
@@ -82,7 +83,7 @@ void Request::userHandle()
 
     if (input.size() > 2)
     {
-        sendMsg(500);
+        sendMsg(500, "USER");
         return;
     }
 
@@ -151,7 +152,7 @@ void Request::pasvHandle()
     p2 = p2 % 256;
 
     int dataPort = p1 * 256 + p2;
-    std::string PASV = server_ip + std::to_string(dataPort);
+    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
 
     Server data_server;
     data_server.setServerPort(std::to_string(dataPort));
@@ -159,20 +160,19 @@ void Request::pasvHandle()
     data_server.Start();
 
     sendMsg(227, PASV);
-
     // I dont get it here
     if (ftp_com.listen_data(data_server) == true)
     {
         std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
-        sendMsg(227, PASV);
+        // sendMsg(227, PASV);
     }
     else
     {
         std::cout << "listen failed!!!!" << std::endl;
-        sendMsg(500);
+        sendMsg(500, "PASV");
     }
 
-    sendMsg(220, std::to_string(dataPort));
+    // sendMsg(220, std::to_string(dataPort));
 }
 
 void Request::getpwdHandle()
@@ -186,7 +186,7 @@ void Request::getcwdHandle()
 {
     if (input.size() > 2)
     {
-        sendMsg(500);
+        sendMsg(500, "CWD");
         return;
     }
 
@@ -373,7 +373,7 @@ void Request::connectBack()
     if (status < 0)
     {
         LOG_ERR("Connection failed");
-        sendMsg(500);
+        sendMsg(500, "PORT");
     }
 
     if (ftp_com.getAuth() == false)
@@ -384,5 +384,6 @@ void Request::connectBack()
 
 void Request::retrHandle()
 {
-    sendMsg(500);
+
+    sendMsg(500, "RETR HANDLE");
 }
