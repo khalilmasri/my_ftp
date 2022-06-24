@@ -33,12 +33,16 @@ private:
     std::string data_ip;
     int data_socket;
 
-    std::string TMP = ".tmp/";
+    std::string origin_path;
 
     int current_state = 0;
     bool passive_mode = false;
+    std::string current_path;
 
     char buff[MAX_TRANSMISSION_LENGTH];
+
+    std::string getOrigin();
+    void setOrigin();
 
     // Input handlers
     std::vector<std::string> input;
@@ -120,6 +124,7 @@ public:
     ~Request();
 
     void handle();
+
 };
 
 #endif

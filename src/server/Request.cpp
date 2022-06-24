@@ -12,8 +12,9 @@ void Request::handle()
 {
 
     sendMsg(220);
+    setOrigin();
     int ret = 0;
-
+    
     while (current_state != 221)
     {
 
@@ -27,6 +28,7 @@ void Request::handle()
 
         buff[ret - 1] = '\0';
         LOG_DEBUG("Got command: %s", buff);
+
 
         parseCommand();
         handleCommand();
@@ -102,6 +104,17 @@ void Request::userHandle()
         sendMsg(501);
     }
 }
+void Request::setOrigin()
+{
+    char origin[MAX_PATH];
+    getcwd(origin, 200);
+    origin_path = origin;
+}
+
+std::string Request::getOrigin()
+{
+    return origin_path;
+}
 
 void Request::passHandle()
 {
@@ -164,7 +177,7 @@ void Request::pasvHandle()
     if (ftp_com.listen_data(data_server) == true)
     {
         std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
-        // sendMsg(227, PASV);
+        sendMsg(220);
     }
     else
     {
@@ -179,6 +192,7 @@ void Request::getpwdHandle()
 {
     char pwd[MAX_PATH];
     getcwd(pwd, MAX_PATH);
+    this->current_path = pwd;
     sendMsg(250, pwd);
 }
 
@@ -198,6 +212,7 @@ void Request::getcwdHandle()
     }
     else if (chdir(cwd.c_str()) == 0)
     {
+        this->current_path = cwd;
         sendMsg(250, cwd);
     }
     else
@@ -215,27 +230,37 @@ void Request::getcdupHandle()
     }
     cwd[i] = '\0';
     chdir(cwd);
+    this->current_path = cwd;
     sendMsg(250, cwd);
 }
 
 void Request::listHandle()
 {
-
     if (ftp_com.getAuth() == false)
     {
         sendMsg(530);
         return;
     }
 
-    std::string filename = TMP + "list" + std::to_string(this->data_socket) + ".txt";
-    std::string command = "ls -l " + getFilePath() + ">" + filename;
+    char cwd[200];
+    getcwd(cwd, 100);
+    std::string path = cwd;
+
+    std::string filename = origin_path + "/list" + ".txt";
+    std::string command = "ls -l " + path + " > " + filename;
 
     std::system(command.c_str());
+
+    // std::cout << "FILE NAME: " << filename << std::endl;
+    // std::cout << "CURRENT PATH: " << path << std::endl;
+    // std::cout << "COMMAND: " << command << std::endl;
 
     std::ostringstream buff;
     std::ifstream outfile(filename.c_str());
     buff << outfile.rdbuf();
     std::string data = buff.str();
+
+    std::cout << data << std::endl;
 
     sendMsg(150);
     sendData(250, data);
@@ -243,6 +268,7 @@ void Request::listHandle()
 
     command = "rm -f " + filename;
     std::system(command.c_str());
+    
 }
 
 void Request::unvalidCommand()
@@ -298,7 +324,7 @@ void Request::sendData(const int status, std::string data)
     char msg[1500];
 
     memset(&msg, 0, sizeof(msg)); // clear the buffer
-    // strcpy(msg, server_reply.at(current_state).c_str());
+    strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, data.c_str());
     strcat(msg, "\r\n");
 
