@@ -160,7 +160,7 @@ void Request::pasvHandle()
 
     sendMsg(227, PASV);
 
-    //I dont get it here
+    // I dont get it here
     if (ftp_com.listen_data(data_server) == true)
     {
         std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
