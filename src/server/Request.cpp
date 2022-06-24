@@ -1,38 +1,40 @@
 #include "request.hpp"
 #include "logger.hpp"
 
-Request::Request(Ftp &ftp_com){
+Request::Request(Ftp &ftp_com)
+{
     this->ftp_com = ftp_com;
 }
 
 Request::~Request(){};
 
-void Request::handle(){
+void Request::handle()
+{
 
     sendMsg(220);
     int ret = 0;
 
-    while(current_state != 221){
+    while (current_state != 221)
+    {
 
-        memset(&buff, 0, sizeof(buff));//clear the buffer
-        if((ret = recv(ftp_com.getRequestID(), (char*)&buff, sizeof(buff), 0)) < 0){
+        memset(&buff, 0, sizeof(buff)); // clear the buffer
+        if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
+        {
             sendMsg(500);
             return;
         }
 
-        buff[ret-1] = '\0';
+        buff[ret - 1] = '\0';
         LOG_DEBUG("Got a commands %s", buff);
 
         parseCommand();
-        handleCommand();    
- 
-        if(ftp_com.getAuth() == true){ 
-            // handle_request();
-        }
-    } 
+        handleCommand();
+
+    }
 }
 
-void Request::parseCommand(){
+void Request::parseCommand()
+{
 
     std::string command = buff;
     std::string cmd;
@@ -41,87 +43,108 @@ void Request::parseCommand(){
     iss.str(command);
 
     int index = 0, count = 0;
-    while(buff[index]){
-        if(buff[index] == ' '){
+    while (buff[index])
+    {
+        if (buff[index] == ' ')
+        {
             count++;
         }
         index++;
     }
-    
+
     count++;
-    for(int i = 0;i < count; i++){
+    for (int i = 0; i < count; i++)
+    {
         iss >> cmd;
         input.push_back(cmd);
     }
 }
 
-void Request::handleCommand(){
+void Request::handleCommand()
+{
 
-    for( auto it : commands){
-        if(it == *input.begin()){
+    for (auto it : commands)
+    {
+        if (it == *input.begin())
+        {
             input.erase(input.begin());
             (*this.*dispatch_table.at(it))();
             input.clear();
             return;
         }
-    } 
-    
+    }
+
     input.clear();
     sendMsg(500);
 }
 
-void Request::userHandle(){
+void Request::userHandle()
+{
 
-    if(input.size() > 2){
+    if (input.size() > 2)
+    {
         sendMsg(500);
         return;
     }
 
-    if (*input.begin() == "anonymous"){
+    if (*input.begin() == "anonymous")
+    {
         sendMsg(331);
         ftp_com.setUser(*input.begin());
-    } else if(*input.begin() == "admin"){
+    }
+    else if (*input.begin() == "admin")
+    {
         sendMsg(331);
         ftp_com.setUser(*input.begin());
-    }else {
+    }
+    else
+    {
         sendMsg(501);
     }
 }
 
-void Request::passHandle(){
+void Request::passHandle()
+{
 
-    if(input.size() > 2){
+    if (input.size() > 2)
+    {
         sendMsg(530);
         return;
     }
 
-    if(ftp_com.getUser() == "anonymous"){
+    if (ftp_com.getUser() == "anonymous")
+    {
         sendMsg(230);
         ftp_com.setPass(*input.begin());
         ftp_com.setAuth(true);
-    }else if( ftp_com.getUser() == "admin" && *input.begin() == "admin"){
+    }
+    else if (ftp_com.getUser() == "admin" && *input.begin() == "admin")
+    {
         sendMsg(230);
         ftp_com.setPass(*input.begin());
         ftp_com.setAuth(true);
-    }else{
+    }
+    else
+    {
         sendMsg(530);
         return;
     }
-    
+
     LOG_DEBUG("Authorized");
 }
 
-void Request::pasvHandle(){
+void Request::pasvHandle()
+{
 
-    //get server ip from server class
-    Server* server = Server::getInstance();
+    // get server ip from server class
+    Server *server = Server::getInstance();
     std::string server_ip = server->getServerIP();
     std::replace(server_ip.begin(), server_ip.end(), '.', ',');
     server_ip += ',';
 
-    //create random number > 0 < 105 
-    std::random_device rd; // obtain a random number from hardware
-    std::mt19937 gen(rd()); // seed the generator
+    // create random number > 0 < 105
+    std::random_device rd;                               // obtain a random number from hardware
+    std::mt19937 gen(rd());                              // seed the generator
     std::uniform_int_distribution<> distr(20000, 30000); // define the range
     int p1 = distr(gen);
     int p2 = p1;
@@ -134,7 +157,6 @@ void Request::pasvHandle(){
 
     int dataPort = p1 * 256 + p2;
     sendMsg(220, std::to_string(dataPort));
-
 }
 
 void Request::getpwdHandle()
@@ -153,21 +175,26 @@ void Request::getcwdHandle()
     }
 
     std::string cwd = *input.begin();
-    if (cwd == ".."){
+    if (cwd == "..")
+    {
         getcdupHandle();
         return;
-    } else if (chdir(cwd.c_str()) == 0)
+    }
+    else if (chdir(cwd.c_str()) == 0)
     {
         sendMsg(250, cwd);
-    } else
+    }
+    else
         sendMsg(550);
 }
 
-void Request::getcdupHandle(){
+void Request::getcdupHandle()
+{
     char cwd[200];
     getcwd(cwd, 100);
     int i = strlen(cwd);
-    while(cwd[i] != '/'){
+    while (cwd[i] != '/')
+    {
         i--;
     }
     cwd[i] = '\0';
@@ -175,86 +202,94 @@ void Request::getcdupHandle(){
     sendMsg(250, cwd);
 }
 
-void Request::listHandle(){
-    
-    if((dir = opendir(ftp_com.getFilePath().c_str())) == NULL){
-        LOG_ERR("Couldn't find directory");
+void Request::listHandle()
+{
+
+    if (ftp_com.getAuth() == false){
+        sendMsg(530);
+        return;
     }
 
-    while((current_dir = readdir(dir)) != NULL){
-        std::string name = current_dir->d_name;
-        if(name != "." && name != ".."){
-            file_list.push_back(name);
-        }
-    }
+    std::string filename = TMP + "list" + std::to_string(this->data_socket) + ".txt";
+    std::string command = "ls -l " + getFilePath() + ">" + filename;
     
-    std::string list = "\n";
-    for (auto it : file_list){
-        list = list + it + "\n";
-    }
-    sendData(150, list);
+    std::system(command.c_str());
+    
+    std::ostringstream buff;
+    std::ifstream outfile(filename.c_str());
+    buff << outfile.rdbuf();
+    std::string data = buff.str();
+    
+    sendMsg(150);
+    sendData(250, data);
+    sendMsg(226);
+    
+    command = "rm -f " + filename;
+    std::system(command.c_str());
 }
 
-void Request::unvalidCommand(){
+void Request::unvalidCommand()
+{
     sendMsg(502);
 }
 
-void Request::quitHandle(){
+void Request::quitHandle()
+{
     LOG_DEBUG("QUIT");
     sendMsg(221);
 }
 
-void Request::sendMsg(const int status){
+void Request::sendMsg(const int status)
+{
 
     current_state = status;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
 
     char msg[1500];
 
-    memset(&msg, 0, sizeof(msg)); //clear the buffer
+    memset(&msg, 0, sizeof(msg)); // clear the buffer
     strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, "\r\n");
 
-    send(ftp_com.getRequestID(), (char*)msg, strlen(msg),0);
+    send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
 
-void Request::sendMsg(const int status, std::string address){
+void Request::sendMsg(const int status, std::string data) {
 
     current_state = status;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
 
     char msg[1500];
 
-    memset(&msg, 0, sizeof(msg)); //clear the buffer
-    strcpy(msg, server_reply.at(current_state).c_str());
-    strcat(msg, " (");
-    strcat(msg, address.c_str());
-    strcat(msg, ")");
-    strcat(msg, "\r\n");
-
-    send(ftp_com.getRequestID(), (char*)msg, strlen(msg),0);
-}
-
-void Request::sendData(const int status, std::string data){
-
-    current_state = status;
-    std::cout << data << std::endl;
-    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
-
-    char msg[1500];
-
-    memset(&msg, 0, sizeof(msg)); //clear the buffer
+    memset(&msg, 0, sizeof(msg)); // clear the buffer
     strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, " (");
     strcat(msg, data.c_str());
     strcat(msg, ")");
     strcat(msg, "\r\n");
 
-    send(this->data_socket, (char*)msg, strlen(msg),0);
-
+    send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
 
-void Request::portHandle(){
+void Request::sendData(const int status, std::string data)
+{
+
+    current_state = status;
+    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+
+    char msg[1500];
+
+    memset(&msg, 0, sizeof(msg)); // clear the buffer
+    // strcpy(msg, server_reply.at(current_state).c_str());
+    strcat(msg, data.c_str());
+    strcat(msg, "\r\n");
+
+    send(this->data_socket, (char *)msg, strlen(msg), 0);
+    close(this->data_socket);
+}
+
+void Request::portHandle()
+{
 
     std::string deli = ",";
     int pos = 0;
@@ -263,18 +298,24 @@ void Request::portHandle(){
     std::string digit = "";
     std::string full_ip = *input.begin();
 
-    std::cout << full_ip << std::endl;
-    while((pos = full_ip.find(deli)) != std::string::npos){
+    while ((pos = full_ip.find(deli)) != std::string::npos)
+    {
         digit = full_ip.substr(0, pos);
         full_ip.erase(0, pos + deli.length());
 
-        if(index < 3){
+        if (index < 3)
+        {
             this->data_ip += digit;
             this->data_ip += deli;
-        }else if(index == 3){
+        }
+        else if (index == 3)
+        {
             this->data_ip += digit;
-        }else{
-            if(index == 4){
+        }
+        else
+        {
+            if (index == 4)
+            {
                 this->data_port = std::stoi(digit) * 256;
             }
         }
@@ -284,16 +325,17 @@ void Request::portHandle(){
 
     digit = full_ip.substr(0, pos);
     this->data_port += std::stoi(digit);
+    std::replace(this->data_ip.begin(), this->data_ip.end(), ',', '.');
 
     LOG_DEBUG("Data IP => %s", this->data_ip.c_str());
     LOG_DEBUG("Data Port => %d", this->data_port);
 
-    handle_request();
-
     sendMsg(200);
+    connectBack();
 }
 
-void Request::handle_request(){
+void Request::connectBack()
+{
 
     struct sockaddr_in data_address;
 
@@ -303,13 +345,24 @@ void Request::handle_request(){
         exit(1);
     }
 
-    int optval = 1;
-
     data_address.sin_port = htons(this->data_port);
     data_address.sin_family = AF_INET;
     data_address.sin_addr.s_addr = inet_addr(this->data_ip.c_str());
 
     int status = connect(data_socket,
-                         (sockaddr*) &data_address, sizeof(data_address));
+                         (sockaddr *)&data_address, sizeof(data_address));
 
+    if (status < 0)
+    {
+        LOG_ERR("Connection failed");
+        sendMsg(500);
+    }
+
+    if (ftp_com.getAuth() == false){
+        sendMsg(530);
+    }
+}
+
+void Request::retrHandle(){
+    sendMsg(500);
 }
