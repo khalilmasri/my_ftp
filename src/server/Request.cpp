@@ -192,7 +192,6 @@ void Request::getpwdHandle()
 {
     char pwd[MAX_PATH];
     getcwd(pwd, MAX_PATH);
-    this->current_path = pwd;
     sendMsg(250, pwd);
 }
 
@@ -212,7 +211,6 @@ void Request::getcwdHandle()
     }
     else if (chdir(cwd.c_str()) == 0)
     {
-        this->current_path = cwd;
         sendMsg(250, cwd);
     }
     else
@@ -230,7 +228,6 @@ void Request::getcdupHandle()
     }
     cwd[i] = '\0';
     chdir(cwd);
-    this->current_path = cwd;
     sendMsg(250, cwd);
 }
 
