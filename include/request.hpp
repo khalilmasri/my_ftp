@@ -21,6 +21,8 @@
 #include <dirent.h>
 #include <unistd.h>
 
+
+
 class Request : public Ftp
 {
 private:
@@ -31,6 +33,8 @@ private:
     std::string data_ip;
     int data_socket;
 
+    std::string TMP = ".tmp/";
+
     int current_state = 0;
     bool passive_mode = false;
 
@@ -40,7 +44,7 @@ private:
     std::vector<std::string> input;
     void parseCommand();
     void handleCommand();
-    void handle_request();
+    void connectBack();
 
     // Message sender
     void sendMsg(const int);
@@ -56,6 +60,7 @@ private:
     void getpwdHandle();
     void getcwdHandle();
     void getcdupHandle();
+    void retrHandle();
     void unvalidCommand();
     void quitHandle();
 
@@ -73,8 +78,9 @@ private:
         {"CDUP", &Request::getcdupHandle},
         {"PASV", &Request::pasvHandle},
         {"PORT", &Request::portHandle},
-        {"LPRT", &Request::listHandle},
+        {"LPRT", &Request::unvalidCommand},
         {"LIST", &Request::listHandle},
+        {"RETR", &Request::retrHandle},
         {"QUIT", &Request::quitHandle}};
 
     std::vector<std::string> commands = {
@@ -83,12 +89,12 @@ private:
         "PWD",
         "CDUP",
         "CWD",
-        "LPRT",
         "PORT",
         "PASV",
         "LIST",
         "LPRT",
         "SYST",
+        "RETR",
         "QUIT"};
 
     // Server reply and status

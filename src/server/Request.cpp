@@ -30,10 +30,6 @@ void Request::handle()
         parseCommand();
         handleCommand();
 
-        if (ftp_com.getAuth() == true)
-        {
-            // handle_request();
-        }
     }
 }
 
@@ -209,17 +205,25 @@ void Request::getcdupHandle()
 void Request::listHandle()
 {
 
-    std::string filename = "list" + std::to_string(this->data_socket) + ".txt";
-    std::string command = "ls -l " + getFilePath() + ">" + filename;
-    std::system(command.c_str());
+    if (ftp_com.getAuth() == false){
+        sendMsg(530);
+        return;
+    }
 
+    std::string filename = TMP + "list" + std::to_string(this->data_socket) + ".txt";
+    std::string command = "ls -l " + getFilePath() + ">" + filename;
+    
+    std::system(command.c_str());
+    
     std::ostringstream buff;
     std::ifstream outfile(filename.c_str());
     buff << outfile.rdbuf();
     std::string data = buff.str();
+    
     sendMsg(150);
     sendData(250, data);
     sendMsg(226);
+    
     command = "rm -f " + filename;
     std::system(command.c_str());
 }
@@ -272,7 +276,6 @@ void Request::sendData(const int status, std::string data)
 {
 
     current_state = status;
-    std::cout << data << std::endl;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
 
     char msg[1500];
@@ -296,7 +299,6 @@ void Request::portHandle()
     std::string digit = "";
     std::string full_ip = *input.begin();
 
-    std::cout << full_ip << std::endl;
     while ((pos = full_ip.find(deli)) != std::string::npos)
     {
         digit = full_ip.substr(0, pos);
@@ -330,10 +332,10 @@ void Request::portHandle()
     LOG_DEBUG("Data Port => %d", this->data_port);
 
     sendMsg(200);
-    handle_request();
+    connectBack();
 }
 
-void Request::handle_request()
+void Request::connectBack()
 {
 
     struct sockaddr_in data_address;
@@ -343,8 +345,6 @@ void Request::handle_request()
         LOG_CRIT("socket error");
         exit(1);
     }
-
-    int optval = 1;
 
     data_address.sin_port = htons(this->data_port);
     data_address.sin_family = AF_INET;
@@ -356,5 +356,14 @@ void Request::handle_request()
     if (status < 0)
     {
         LOG_ERR("Connection failed");
+        sendMsg(500);
     }
+
+    if (ftp_com.getAuth() == false){
+        sendMsg(530);
+    }
+}
+
+void Request::retrHandle(){
+    sendMsg(500);
 }
