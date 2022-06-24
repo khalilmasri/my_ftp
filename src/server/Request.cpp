@@ -29,7 +29,6 @@ void Request::handle()
 
         parseCommand();
         handleCommand();
-
     }
 }
 
@@ -151,11 +150,28 @@ void Request::pasvHandle()
     p1 = p2 / 256;
     p2 = p2 % 256;
 
-    LOG_DEBUG("P1: %d P2: %d", p1, p2);
-    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
+    int dataPort = p1 * 256 + p2;
+    std::string PASV = server_ip + std::to_string(dataPort);
+
+    Server data_server;
+    data_server.setServerPort(std::to_string(dataPort));
+    data_server.setFilePath(ftp_com.getFilePath());
+    data_server.Start();
+
     sendMsg(227, PASV);
 
-    int dataPort = p1 * 256 + p2;
+    //I dont get it here
+    if (ftp_com.listen_data(data_server) == true)
+    {
+        std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
+        sendMsg(227, PASV);
+    }
+    else
+    {
+        std::cout << "listen failed!!!!" << std::endl;
+        sendMsg(500);
+    }
+
     sendMsg(220, std::to_string(dataPort));
 }
 
@@ -205,25 +221,26 @@ void Request::getcdupHandle()
 void Request::listHandle()
 {
 
-    if (ftp_com.getAuth() == false){
+    if (ftp_com.getAuth() == false)
+    {
         sendMsg(530);
         return;
     }
 
     std::string filename = TMP + "list" + std::to_string(this->data_socket) + ".txt";
     std::string command = "ls -l " + getFilePath() + ">" + filename;
-    
+
     std::system(command.c_str());
-    
+
     std::ostringstream buff;
     std::ifstream outfile(filename.c_str());
     buff << outfile.rdbuf();
     std::string data = buff.str();
-    
+
     sendMsg(150);
     sendData(250, data);
     sendMsg(226);
-    
+
     command = "rm -f " + filename;
     std::system(command.c_str());
 }
@@ -254,7 +271,8 @@ void Request::sendMsg(const int status)
     send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
 
-void Request::sendMsg(const int status, std::string data) {
+void Request::sendMsg(const int status, std::string data)
+{
 
     current_state = status;
     LOG_DEBUG("%s", server_reply.at(current_state).c_str());
@@ -358,11 +376,13 @@ void Request::connectBack()
         sendMsg(500);
     }
 
-    if (ftp_com.getAuth() == false){
+    if (ftp_com.getAuth() == false)
+    {
         sendMsg(530);
     }
 }
 
-void Request::retrHandle(){
+void Request::retrHandle()
+{
     sendMsg(500);
 }

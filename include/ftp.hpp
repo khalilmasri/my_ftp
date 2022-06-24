@@ -38,6 +38,7 @@ class Ftp{
         sockaddr_in sendSockAddr;
 
         // state and authorization
+        bool pasv_mode = false;
         bool authorized = false;
 
         // User data
@@ -58,6 +59,7 @@ class Ftp{
 
         int getServerSock() const;
         int getServerPort() const;
+        bool getPASV() const;
         std::string getFilePath() const;
         int getDataPort() const;
 
@@ -67,12 +69,15 @@ class Ftp{
         void setUser(const std::string);
         void setPass(const std::string);
         void setDataPort(const int);
+        
+        void setPASV(const bool);
         void setAuth(const bool);
 
         std::string getUser() const;
         std::string getPass() const;
 
         bool listen_request();
+        bool listen_data(Server&);
 };
 
 #endif

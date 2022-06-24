@@ -30,6 +30,7 @@ class Server{
         int server_port;
         std::string file_path;
         int server_sock;
+        int data_socket;
         
     public:
         Server();
