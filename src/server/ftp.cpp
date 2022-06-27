@@ -11,6 +11,7 @@ Ftp::Ftp(){
     server_sock = server->getServerSocket();
     port = server->getServerPort();
     filePath = server->getFilePath();
+    server_ip = server->getServerIP();
 
     LOG_DEBUG("Socket => %d port => %d Path => %s", server_sock, port, filePath.c_str());
 }
@@ -96,4 +97,8 @@ std::string Ftp::getPass() const{
 
 int Ftp::getDataID() const{
     return this->data_id;
+}
+
+std::string Ftp::getServerIP() const{
+    return this->server_ip;
 }

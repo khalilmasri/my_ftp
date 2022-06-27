@@ -7,6 +7,7 @@ Server::Server(){
     server_port = 0;
     server_sock = 0;
     file_path = "";
+    server_ip = "127.0.0.1";
 }
 
 
@@ -36,7 +37,7 @@ void Server::createServerSock(){
 
     this->server_address.sin_port = htons(server_port);
     this->server_address.sin_family = AF_INET;
-    this->server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    this->server_address.sin_addr.s_addr = inet_addr(server_ip.c_str());
 
     
     if(setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR,&optval,sizeof(int)) < 0){
@@ -69,7 +70,7 @@ void Server::setFilePath(std::string file_path){
 }
 
 std::string Server::getServerIP(){
-    return inet_ntoa(this->server_address.sin_addr);
+    return server_ip;
 }
 
 int Server::getServerPort(){

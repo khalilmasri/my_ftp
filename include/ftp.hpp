@@ -30,6 +30,7 @@ class Ftp{
         int port;
         std::string filePath;
         int dataPort;
+        std::string server_ip;
 
         // Origin client details
         int request_id;
@@ -64,6 +65,7 @@ class Ftp{
 
         int getServerSock() const;
         int getServerPort() const;
+        std::string getServerIP() const;
         bool getPASV() const;
         std::string getFilePath() const;
         int getDataPort() const;

@@ -28,6 +28,7 @@ class Server{
 
         static Server server_instance;
         int server_port;
+        std::string server_ip;
         std::string file_path;
         int server_sock;
         int data_socket;

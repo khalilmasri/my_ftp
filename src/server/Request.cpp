@@ -153,9 +153,7 @@ void Request::passHandle()
 void Request::pasvHandle()
 {
 
-    // get server ip from server class
-    Server *server = Server::getInstance();
-    std::string server_ip = server->getServerIP();
+    std::string server_ip = this->ftp_com.getServerIP();
     std::replace(server_ip.begin(), server_ip.end(), '.', ',');
     server_ip += ',';
 
@@ -190,7 +188,6 @@ void Request::pasvHandle()
         sendMsg(500, "PASV");
     }
 
-    // sendMsg(220, std::to_string(dataPort));
 }
 
 void Request::getpwdHandle()
