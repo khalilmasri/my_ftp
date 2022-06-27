@@ -37,6 +37,11 @@ class Ftp{
         socklen_t addr_size = sizeof(request_addr);
         sockaddr_in sendSockAddr;
 
+        // Data socket details
+        int data_id;
+        struct sockaddr_in data_addr;
+        socklen_t data_addr_size = sizeof(data_addr);
+
         // state and authorization
         bool pasv_mode = false;
         bool authorized = false;
@@ -65,6 +70,7 @@ class Ftp{
 
         int getRequestID() const;
         bool getAuth() const;
+        int getDataID() const;
 
         void setUser(const std::string);
         void setPass(const std::string);

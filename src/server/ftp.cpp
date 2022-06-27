@@ -30,7 +30,7 @@ bool Ftp::listen_request() {
 
 bool Ftp::listen_data(Server& data_server) {
 
-    if (this->request_id = accept(data_server.getServerSocket(), (struct sockaddr*)&request_addr, &addr_size) < 0)
+    if (this->data_id = accept(data_server.getServerSocket(), (struct sockaddr*)&data_addr, &data_addr_size) < 0)
     {
         if(!detach){
             LOG_ERR("accept Error");
@@ -92,4 +92,8 @@ std::string Ftp::getUser() const{
 
 std::string Ftp::getPass() const{
     return this->pass;
+}
+
+int Ftp::getDataID() const{
+    return this->data_id;
 }

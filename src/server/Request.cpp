@@ -12,7 +12,8 @@ void Request::handle()
 {
 
     sendMsg(220);
-    setOrigin();
+    setOriginPath();
+    
     int ret = 0;
     
     while (current_state != 221)
@@ -21,9 +22,12 @@ void Request::handle()
         memset(&buff, 0, sizeof(buff)); // clear the buffer
         if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
         {
-
-            sendMsg(500, "handle() error!");
-            return;
+            // if((ret = recv(data_socket, (char *)&buff, sizeof(buff), 0)) < 0){
+                std::cout << buff << std::endl;
+                sendMsg(500, "handle() error!");
+                return;
+            // }
+            
         }
 
         buff[ret - 1] = '\0';
@@ -104,14 +108,14 @@ void Request::userHandle()
         sendMsg(501);
     }
 }
-void Request::setOrigin()
+void Request::setOriginPath()
 {
     char origin[MAX_PATH];
     getcwd(origin, 200);
     origin_path = origin;
 }
 
-std::string Request::getOrigin()
+std::string Request::getOriginPath()
 {
     return origin_path;
 }
@@ -177,7 +181,8 @@ void Request::pasvHandle()
     if (ftp_com.listen_data(data_server) == true)
     {
         std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
-        sendMsg(220);
+        this->data_socket = ftp_com.getDataID();
+        // sendMsg(220);
     }
     else
     {
@@ -248,10 +253,6 @@ void Request::listHandle()
 
     std::system(command.c_str());
 
-    // std::cout << "FILE NAME: " << filename << std::endl;
-    // std::cout << "CURRENT PATH: " << path << std::endl;
-    // std::cout << "COMMAND: " << command << std::endl;
-
     std::ostringstream buff;
     std::ifstream outfile(filename.c_str());
     buff << outfile.rdbuf();
@@ -298,7 +299,7 @@ void Request::sendMsg(const int status, std::string data)
 {
 
     current_state = status;
-    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+    LOG_DEBUG("%s (%s)", server_reply.at(current_state).c_str() , data.c_str());
 
     char msg[1500];
 
@@ -408,5 +409,5 @@ void Request::connectBack()
 void Request::retrHandle()
 {
 
-    sendMsg(500, "RETR HANDLE");
+    sendMsg(502, "RETR HANDLE");
 }

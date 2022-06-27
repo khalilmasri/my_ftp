@@ -41,8 +41,8 @@ private:
 
     char buff[MAX_TRANSMISSION_LENGTH];
 
-    std::string getOrigin();
-    void setOrigin();
+    std::string getOriginPath();
+    void setOriginPath();
 
     // Input handlers
     std::vector<std::string> input;
