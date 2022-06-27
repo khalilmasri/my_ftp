@@ -30,6 +30,7 @@ class Ftp{
         int port;
         std::string filePath;
         int dataPort;
+        std::string server_ip;
 
         // Origin client details
         int request_id;
@@ -37,7 +38,13 @@ class Ftp{
         socklen_t addr_size = sizeof(request_addr);
         sockaddr_in sendSockAddr;
 
+        // Data socket details
+        int data_id;
+        struct sockaddr_in data_addr;
+        socklen_t data_addr_size = sizeof(data_addr);
+
         // state and authorization
+        bool pasv_mode = false;
         bool authorized = false;
 
         // User data
@@ -58,21 +65,27 @@ class Ftp{
 
         int getServerSock() const;
         int getServerPort() const;
+        std::string getServerIP() const;
+        bool getPASV() const;
         std::string getFilePath() const;
         int getDataPort() const;
 
         int getRequestID() const;
         bool getAuth() const;
+        int getDataID() const;
 
         void setUser(const std::string);
         void setPass(const std::string);
         void setDataPort(const int);
+        
+        void setPASV(const bool);
         void setAuth(const bool);
 
         std::string getUser() const;
         std::string getPass() const;
 
         bool listen_request();
+        bool listen_data(Server&);
 };
 
 #endif

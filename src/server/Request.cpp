@@ -12,24 +12,26 @@ void Request::handle()
 {
 
     sendMsg(220);
+    setOriginPath();
+    
     int ret = 0;
-
+    
     while (current_state != 221)
     {
 
         memset(&buff, 0, sizeof(buff)); // clear the buffer
         if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
         {
-            sendMsg(500);
-            return;
+            sendMsg(500, "handle() error!");
+            return;            
         }
 
         buff[ret - 1] = '\0';
-        LOG_DEBUG("Got a commands %s", buff);
+        LOG_DEBUG("Got command: %s", buff);
+
 
         parseCommand();
         handleCommand();
-
     }
 }
 
@@ -75,7 +77,7 @@ void Request::handleCommand()
     }
 
     input.clear();
-    sendMsg(500);
+    sendMsg(500, "HANDLE_COMMAND() error!");
 }
 
 void Request::userHandle()
@@ -83,7 +85,7 @@ void Request::userHandle()
 
     if (input.size() > 2)
     {
-        sendMsg(500);
+        sendMsg(500, "USER");
         return;
     }
 
@@ -101,6 +103,17 @@ void Request::userHandle()
     {
         sendMsg(501);
     }
+}
+void Request::setOriginPath()
+{
+    char origin[MAX_PATH];
+    getcwd(origin, 200);
+    origin_path = origin;
+}
+
+std::string Request::getOriginPath()
+{
+    return origin_path;
 }
 
 void Request::passHandle()
@@ -136,9 +149,7 @@ void Request::passHandle()
 void Request::pasvHandle()
 {
 
-    // get server ip from server class
-    Server *server = Server::getInstance();
-    std::string server_ip = server->getServerIP();
+    std::string server_ip = this->ftp_com.getServerIP();
     std::replace(server_ip.begin(), server_ip.end(), '.', ',');
     server_ip += ',';
 
@@ -151,12 +162,28 @@ void Request::pasvHandle()
     p1 = p2 / 256;
     p2 = p2 % 256;
 
-    LOG_DEBUG("P1: %d P2: %d", p1, p2);
-    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
-    sendMsg(227, PASV);
-
     int dataPort = p1 * 256 + p2;
-    sendMsg(220, std::to_string(dataPort));
+    std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
+
+    Server data_server;
+    data_server.setServerPort(std::to_string(dataPort));
+    data_server.setFilePath(ftp_com.getFilePath());
+    data_server.Start();
+
+    sendMsg(227, PASV);
+    // I dont get it here
+    if (ftp_com.listen_data(data_server) == true)
+    {
+        std::cout << "Data port listening on " << data_server.getServerPort() << std::endl;
+        this->data_socket = ftp_com.getDataID();
+        // sendMsg(220);
+    }
+    else
+    {
+        std::cout << "listen failed!!!!" << std::endl;
+        sendMsg(500, "PASV");
+    }
+
 }
 
 void Request::getpwdHandle()
@@ -170,7 +197,7 @@ void Request::getcwdHandle()
 {
     if (input.size() > 2)
     {
-        sendMsg(500);
+        sendMsg(500, "CWD");
         return;
     }
 
@@ -204,28 +231,35 @@ void Request::getcdupHandle()
 
 void Request::listHandle()
 {
-
-    if (ftp_com.getAuth() == false){
+    if (ftp_com.getAuth() == false)
+    {
         sendMsg(530);
         return;
     }
 
-    std::string filename = TMP + "list" + std::to_string(this->data_socket) + ".txt";
-    std::string command = "ls -l " + getFilePath() + ">" + filename;
-    
+    char cwd[200];
+    getcwd(cwd, 100);
+    std::string path = cwd;
+
+    std::string filename = origin_path + "/list" + ".txt";
+    std::string command = "ls -l " + path + " > " + filename;
+
     std::system(command.c_str());
-    
+
     std::ostringstream buff;
     std::ifstream outfile(filename.c_str());
     buff << outfile.rdbuf();
     std::string data = buff.str();
-    
+
+    std::cout << data << std::endl;
+
     sendMsg(150);
     sendData(250, data);
     sendMsg(226);
-    
+
     command = "rm -f " + filename;
     std::system(command.c_str());
+    
 }
 
 void Request::unvalidCommand()
@@ -254,10 +288,11 @@ void Request::sendMsg(const int status)
     send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
 
-void Request::sendMsg(const int status, std::string data) {
+void Request::sendMsg(const int status, std::string data)
+{
 
     current_state = status;
-    LOG_DEBUG("%s", server_reply.at(current_state).c_str());
+    LOG_DEBUG("%s (%s)", server_reply.at(current_state).c_str() , data.c_str());
 
     char msg[1500];
 
@@ -280,7 +315,7 @@ void Request::sendData(const int status, std::string data)
     char msg[1500];
 
     memset(&msg, 0, sizeof(msg)); // clear the buffer
-    // strcpy(msg, server_reply.at(current_state).c_str());
+    strcpy(msg, server_reply.at(current_state).c_str());
     strcat(msg, data.c_str());
     strcat(msg, "\r\n");
 
@@ -355,14 +390,17 @@ void Request::connectBack()
     if (status < 0)
     {
         LOG_ERR("Connection failed");
-        sendMsg(500);
+        sendMsg(500, "PORT");
     }
 
-    if (ftp_com.getAuth() == false){
+    if (ftp_com.getAuth() == false)
+    {
         sendMsg(530);
     }
 }
 
-void Request::retrHandle(){
-    sendMsg(500);
+void Request::retrHandle()
+{
+
+    sendMsg(502, "RETR HANDLE");
 }
