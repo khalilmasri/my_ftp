@@ -22,12 +22,8 @@ void Request::handle()
         memset(&buff, 0, sizeof(buff)); // clear the buffer
         if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
         {
-            // if((ret = recv(data_socket, (char *)&buff, sizeof(buff), 0)) < 0){
-                std::cout << buff << std::endl;
-                sendMsg(500, "handle() error!");
-                return;
-            // }
-            
+            sendMsg(500, "handle() error!");
+            return;            
         }
 
         buff[ret - 1] = '\0';
