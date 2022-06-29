@@ -85,7 +85,6 @@ bool Data::listHandle(std::string origin_path) {
     return true;
 }
 
-#include <stdio.h>
 void Data::sendData(std::string data)
 {
 
