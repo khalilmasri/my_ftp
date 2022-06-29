@@ -16,7 +16,7 @@ Ftp::Ftp(){
     LOG_DEBUG("Socket => %d port => %d Path => %s", server_sock, port, filePath.c_str());
 }
 
-bool Ftp::listen_request() {
+bool Ftp::listenRequest() {
 
     if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
     {
@@ -29,19 +29,6 @@ bool Ftp::listen_request() {
     return true;
 }
 
-bool Ftp::listen_data(Server& data_server) {
-
-    if (this->data_id = accept(data_server.getServerSocket(), (struct sockaddr*)&data_addr, &data_addr_size) < 0)
-    {
-        if(!detach){
-            LOG_ERR("accept Error");
-        }
-        return false;
-    }
-    return true;
-}
-
-
 int Ftp::getServerSock() const{
     return this->server_sock;
 }
@@ -53,8 +40,6 @@ int Ftp::getServerPort() const{
 std::string Ftp::getFilePath() const{
     return this->filePath;
 }
-
-
 
 int Ftp::getDataPort() const{
     return this->dataPort;

@@ -3,6 +3,7 @@
 #define REQUEST_HPP
 
 #include "ftp.hpp"
+#include "data.hpp"
 
 // LIBRARIES
 #include <thread>
@@ -28,12 +29,10 @@ class Request : public Ftp
 private:
     Ftp ftp_com;
 
-    // Client data transfer
-    int data_port;
-    std::string data_ip;
-    int data_socket;
-
     std::string origin_path;
+
+    // Client requested data
+    Data data;
 
     int current_state = 0;
     bool passive_mode = false;
