@@ -84,8 +84,8 @@ class Ftp{
         std::string getUser() const;
         std::string getPass() const;
 
-        bool listen_request();
-        bool listen_data(Server&);
+        bool listenRequest();
+        int listenData(int);
 };
 
 #endif

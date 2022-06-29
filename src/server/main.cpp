@@ -49,7 +49,7 @@ int main(int argc, char** argv){
             if(thread_pool.getAvailableThreads() > thread_pool.getNumThreads() / 2){
                 thread_pool.QueueJob([]{
                     Ftp ftp_com;
-                    if(ftp_com.listen_request() == true){
+                    if(ftp_com.listenRequest() == true){
                         Request request(ftp_com);
                         request.handle();
                     }});

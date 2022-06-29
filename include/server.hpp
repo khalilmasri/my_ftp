@@ -40,7 +40,7 @@ class Server{
         ~Server();
 
         // METHODS
-        void run();
+        void initListen();
         void Start();
         void closeServer();
 
@@ -57,6 +57,7 @@ class Server{
         // SETTERS
         void setFilePath(std::string);
         void setServerPort(std::string);
+        void closeData(int);
 };
 
 extern Server server;
