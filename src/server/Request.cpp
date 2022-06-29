@@ -349,5 +349,39 @@ void Request::portHandle()
 void Request::retrHandle()
 {
 
-    sendMsg(502, "RETR HANDLE");
+    if (ftp_com.getAuth() == false)
+    {
+        sendMsg(530);
+        return;
+    }
+
+    if (input.size() > 2)
+    {
+        sendMsg(530);
+        return;
+    }
+
+    char cwd[MAX_PATH];
+    getcwd(cwd, MAX_PATH);
+    std::string path = cwd;
+
+    std::string filename = *input.begin();
+    std::string filepath = path + "/" + filename;
+    LOG_DEBUG("Filepath => %s", filepath.c_str());
+
+    if (access(filepath.c_str(), F_OK) == -1)
+    {
+        sendMsg(550);
+        return;
+    }
+
+    sendMsg(150);
+    
+    bool status = data.retrHandle(filepath);
+
+    if( status == true){
+        sendMsg(226);
+    }else{
+        sendMsg(500, "LIST FAILED");
+    }
 }
