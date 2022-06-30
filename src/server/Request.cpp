@@ -13,9 +13,9 @@ void Request::handle()
 
     sendMsg(220);
     setOriginPath();
-    
+
     int ret = 0;
-    
+
     while (current_state != 221)
     {
 
@@ -28,7 +28,6 @@ void Request::handle()
 
         buff[ret - 1] = '\0';
         LOG_DEBUG("Got command: %s", buff);
-
 
         parseCommand();
         handleCommand();
@@ -92,17 +91,18 @@ void Request::userHandle()
     if (*input.begin() == "anonymous")
     {
         sendMsg(331);
-        ftp_com.setUser(*input.begin());
     }
     else if (*input.begin() == "admin")
     {
         sendMsg(331);
-        ftp_com.setUser(*input.begin());
     }
     else
     {
         sendMsg(501);
+        return;
     }
+
+    ftp_com.setUser(*input.begin());
 }
 void Request::setOriginPath()
 {
@@ -128,14 +128,10 @@ void Request::passHandle()
     if (ftp_com.getUser() == "anonymous")
     {
         sendMsg(230);
-        ftp_com.setPass(*input.begin());
-        ftp_com.setAuth(true);
     }
     else if (ftp_com.getUser() == "admin" && *input.begin() == "admin")
     {
         sendMsg(230);
-        ftp_com.setPass(*input.begin());
-        ftp_com.setAuth(true);
     }
     else
     {
@@ -143,6 +139,8 @@ void Request::passHandle()
         return;
     }
 
+    ftp_com.setPass(*input.begin());
+    ftp_com.setAuth(true);
     LOG_DEBUG("Authorized");
 }
 
@@ -230,7 +228,7 @@ void Request::listHandle()
     }
 
     sendMsg(150);
-    
+
     bool status = data.listHandle(origin_path);
 
     if( true == status){

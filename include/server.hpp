@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #define SERVER_PORT 21
 #define MAX_TRANSMISSION_LENGTH 100000
