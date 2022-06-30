@@ -14,6 +14,8 @@ void Request::handle()
     sendMsg(220);
     setOriginPath();
 
+    this->current_path = ".";
+
     int ret = 0;
 
     while (current_state != 221)
@@ -106,9 +108,8 @@ void Request::userHandle()
 }
 void Request::setOriginPath()
 {
-    char origin[MAX_PATH];
-    getcwd(origin, 200);
-    origin_path = origin;
+    origin_path = ftp_com.getFilePath();
+    origin_path_size = origin_path.length();
 }
 
 std::string Request::getOriginPath()
@@ -120,7 +121,7 @@ void Request::passHandle()
 {
 
     if (input.size() > 2)
-    {
+  {
         sendMsg(530);
         return;
     }
@@ -164,7 +165,7 @@ void Request::pasvHandle()
     std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
 
     sendMsg(227, PASV);
-    bool status = data.pasvHandle(data_port, ftp_com.getFilePath());
+    bool status = data.pasvHandle(data_port, this->current_path);
 
     if( false == status ){
         sendMsg(500, "PASV");
@@ -175,9 +176,7 @@ void Request::pasvHandle()
 
 void Request::getpwdHandle()
 {
-    char pwd[MAX_PATH];
-    getcwd(pwd, MAX_PATH);
-    sendMsg(250, pwd);
+    sendMsg(250, this->current_path);
 }
 
 void Request::getcwdHandle()
@@ -188,34 +187,58 @@ void Request::getcwdHandle()
         return;
     }
 
+    int res = 0;
     std::string cwd = *input.begin();
+
     if (cwd == "..")
     {
         getcdupHandle();
         return;
     }
-    else if (chdir(cwd.c_str()) == 0)
-    {
-        sendMsg(250, cwd);
+
+    res = access(cwd.c_str(), F_OK);
+
+    if( -1 == res ){
+        sendMsg(501, "Directory doesn't exist");
+        return;
     }
-    else
+
+    cwd = this->origin_path + "/" + (*input.begin());
+    res = access(cwd.c_str(), F_OK);
+
+    if ( -1 == res)
     {
-        sendMsg(550);
+        sendMsg(501, "Directory doesn't exist");
+        return;
     }
+
+    this->current_path += "/" + (*input.begin());
+
+    sendMsg(250, this->current_path);
 }
 
 void Request::getcdupHandle()
 {
-    char cwd[200];
-    getcwd(cwd, 100);
-    int i = strlen(cwd);
-    while (cwd[i] != '/')
+
+    std::string cwd = this->current_path;
+
+    int i = cwd.length();
+    
+    while (cwd[i] != '\0' && cwd[i] != '/')
     {
         i--;
     }
+
     cwd[i] = '\0';
-    chdir(cwd);
-    sendMsg(250, cwd);
+
+    if( i <= 0){
+        sendMsg(501, "Parent directory is not accesssable");
+        return;
+    }
+
+    this->current_path = cwd;
+
+    sendMsg(250, this->current_path);
 }
 
 void Request::listHandle()
@@ -227,9 +250,17 @@ void Request::listHandle()
         return;
     }
 
+    std::string path;
+
+    if(input.size() == 1){
+        path = "/" + *input.begin();
+    }else{
+        this->current_path
+        path = 
+    }
     sendMsg(150);
 
-    bool status = data.listHandle(origin_path);
+    bool status = data.listHandle(origin_path, path);
 
     if( true == status){
         sendMsg(226);
@@ -359,12 +390,8 @@ void Request::retrHandle()
         return;
     }
 
-    char cwd[MAX_PATH];
-    getcwd(cwd, MAX_PATH);
-    std::string path = cwd;
-
     std::string filename = *input.begin();
-    std::string filepath = path + "/" + filename;
+    std::string filepath = this->current_path + "/" + filename;
     LOG_DEBUG("Filepath => %s", filepath.c_str());
 
     if (access(filepath.c_str(), F_OK) == -1)
@@ -380,6 +407,6 @@ void Request::retrHandle()
     if( status == true){
         sendMsg(226);
     }else{
-        sendMsg(500, "LIST FAILED");
+        sendMsg(500, "RETR FAILED");
     }
 }

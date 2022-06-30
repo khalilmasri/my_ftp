@@ -22,14 +22,13 @@
 #include <dirent.h>
 #include <unistd.h>
 
-
-
 class Request : public Ftp
 {
 private:
     Ftp ftp_com;
 
     std::string origin_path;
+    size_t origin_path_size;
 
     // Client requested data
     Data data;
@@ -67,6 +66,7 @@ private:
     void unvalidCommand();
     void quitHandle();
 
+    std::string wDirectory();
     // File handle
     DIR *dir;
     dirent *current_dir;
@@ -123,7 +123,6 @@ public:
     ~Request();
 
     void handle();
-
 };
 
 #endif

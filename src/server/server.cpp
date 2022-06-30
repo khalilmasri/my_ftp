@@ -79,6 +79,7 @@ void Server::setServerPort(const std::string port){
 void Server::setFilePath(std::string file_path){
 
     std::ifstream file(file_path.c_str());
+
     if( false == (file.good())){
         LOG_CRIT("File path provided is not available");
         exit(1);

@@ -99,15 +99,9 @@ bool Data::retrHandle(std::string filepath)
         buffer += "\n";
     }
 
-    std::cout << "CONTENTS: " << buffer << std::endl;
-
     file.close();
 
     sendData(buffer);
-
-    // got to here, it says it has been sent in the client window, 
-    // i just made a .txt file in the my_ftp directory to test it, 
-    //  but it isnt displaying so far
 
     return true;
 }
