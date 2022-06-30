@@ -25,7 +25,7 @@ void Request::handle()
         if ((ret = recv(ftp_com.getRequestID(), (char *)&buff, sizeof(buff), 0)) < 0)
         {
             sendMsg(500, "handle() error!");
-            return;            
+            return;
         }
 
         buff[ret - 1] = '\0';
@@ -121,7 +121,7 @@ void Request::passHandle()
 {
 
     if (input.size() > 2)
-  {
+    {
         sendMsg(530);
         return;
     }
@@ -167,11 +167,11 @@ void Request::pasvHandle()
     sendMsg(227, PASV);
     bool status = data.pasvHandle(data_port, this->current_path);
 
-    if( false == status ){
+    if (false == status)
+    {
         sendMsg(500, "PASV");
         return;
     }
-
 }
 
 void Request::getpwdHandle()
@@ -196,23 +196,27 @@ void Request::getcwdHandle()
         return;
     }
 
-    res = access(cwd.c_str(), F_OK);
+    cwd = this->current_path + "/" + *input.begin(); //try adding current path first
 
-    if( -1 == res ){
-        sendMsg(501, "Directory doesn't exist");
-        return;
-    }
-
-    cwd = this->origin_path + "/" + (*input.begin());
-    res = access(cwd.c_str(), F_OK);
-
-    if ( -1 == res)
+    if(cwd != this->current_path)
     {
-        sendMsg(501, "Directory doesn't exist");
-        return;
-    }
+        if (access(cwd.c_str(), F_OK) == -1)
+        {
+        cwd = *input.begin();                        //if not that maybe its already full path
+        if (access(cwd.c_str(), F_OK) == -1)
+        {
+            sendMsg(501, "Directory doesn't exist"); //if not, its not a directory
+            return;
+        }
+    } 
+    else
+    {
+        sendMsg(501, "That is the current directory");
+    }  
+}
+    
 
-    this->current_path += "/" + (*input.begin());
+    this->current_path = cwd;
 
     sendMsg(250, this->current_path);
 }
@@ -223,15 +227,16 @@ void Request::getcdupHandle()
     std::string cwd = this->current_path;
 
     int i = cwd.length();
-    
-    while (cwd[i] != '\0' && cwd[i] != '/')
+
+    while (i != 0 && cwd[i] != '/')
     {
         i--;
     }
 
     cwd[i] = '\0';
 
-    if( i <= 0){
+    if (i <= 0)
+    {
         sendMsg(501, "Parent directory is not accesssable");
         return;
     }
@@ -244,30 +249,45 @@ void Request::getcdupHandle()
 void Request::listHandle()
 {
 
+    std::string path = current_path;
+    bool status = false;
+
     if (ftp_com.getAuth() == false)
     {
         sendMsg(530);
         return;
     }
 
-    std::string path;
-
-    if(input.size() == 1){
-        path = "/" + *input.begin();
-    }else{
-        this->current_path
-        path = 
+    if (input.size() == 1)
+    {
+        path = this->current_path + "/" + *input.begin();
+        if (access(path.c_str(), F_OK) == -1)
+        {
+            path = *input.begin();
+            if (access(path.c_str(), F_OK) == -1)
+            {
+                sendMsg(501, "Directory doesn't exist");
+                return;
+            }
+        }
+        
+        // listHandle with path provided here, path is now the correct full path, 
+        // !!!assuming you cant check parent directories?? that would be a bit more complex :/
+        bool status = data.listHandle(origin_path, path);
     }
-    sendMsg(150);
-
-    bool status = data.listHandle(origin_path, path);
-
-    if( true == status){
+    else
+    {
+        // listHandle for current directory
+        status = data.listHandle(origin_path, path);
+    }
+    if (status = true)
+    {
         sendMsg(226);
-    }else{
+    }
+    else
+    {
         sendMsg(500, "LIST FAILED");
     }
-
 }
 
 void Request::unvalidCommand()
@@ -300,7 +320,7 @@ void Request::sendMsg(const int status, std::string data)
 {
 
     current_state = status;
-    LOG_DEBUG("%s (%s)", server_reply.at(current_state).c_str() , data.c_str());
+    LOG_DEBUG("%s (%s)", server_reply.at(current_state).c_str(), data.c_str());
 
     char msg[1500];
 
@@ -313,8 +333,6 @@ void Request::sendMsg(const int status, std::string data)
 
     send(ftp_com.getRequestID(), (char *)msg, strlen(msg), 0);
 }
-
-
 
 void Request::portHandle()
 {
@@ -401,12 +419,15 @@ void Request::retrHandle()
     }
 
     sendMsg(150);
-    
+
     bool status = data.retrHandle(filepath);
 
-    if( status == true){
+    if (status == true)
+    {
         sendMsg(226);
-    }else{
+    }
+    else
+    {
         sendMsg(500, "RETR FAILED");
     }
 }

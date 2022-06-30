@@ -57,14 +57,10 @@ bool Data::pasvHandle(int data_port, std::string filepath){
     return true;
 }
 
-bool Data::listHandle(std::string origin_path) {
-
-    char cwd[200];
-    getcwd(cwd, 100);
-    std::string path = cwd;
+bool Data::listHandle(std::string origin_path, std::string directory) {
 
     std::string filename = origin_path + "/list" + ".txt";
-    std::string command = "ls -l " + path + " > " + filename;
+    std::string command = "ls -l " + directory + " > " + filename;
 
     std::system(command.c_str());
 
