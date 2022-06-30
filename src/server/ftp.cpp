@@ -18,7 +18,9 @@ Ftp::Ftp(){
 
 bool Ftp::listenRequest() {
 
-    if ((this->request_id = accept(server_sock, (struct sockaddr*)&request_addr, &addr_size)) < 0)
+    this->request_id = accept(server_sock, (struct sockaddr*)&request_addr,
+                              &addr_size);
+    if (this->request_id < 0)
     {
         if(!detach){
             LOG_ERR("accept Error");

@@ -44,7 +44,9 @@ bool Data::pasvHandle(int data_port, std::string filepath){
     struct sockaddr_in data_addr;
     socklen_t data_addr_size = sizeof(data_addr);
 
-    if ((this->data_socket = accept(this->data_server.getServerSocket(), (struct sockaddr*)&data_addr, &data_addr_size)) < 0)
+    this->data_socket = accept(this->data_server.getServerSocket(),
+                              (struct sockaddr*)&data_addr, &data_addr_size);
+    if (this->data_socket < 0)
     {
         if(!detach){
             LOG_ERR("accept Error");
