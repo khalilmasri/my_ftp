@@ -189,36 +189,42 @@ void Request::getcwdHandle()
 
     int res = 0;
     std::string cwd = *input.begin();
+    std::string current = this->current_path;
 
     if (cwd == "..")
     {
         getcdupHandle();
         return;
     }
-
-    cwd = this->current_path + "/" + *input.begin(); //try adding current path first
-
-    if(cwd != this->current_path)
+    //get substring from the last '/'
+    std::string::size_type pos = this->current_path.find_last_of('/');
+    if (pos != std::string::npos && pos != 0)
     {
+        current = this->current_path.substr(pos + 1);
+    }
+
+    if(cwd != current)
+    {
+        cwd = current + "/" + *input.begin();
+        std::cout << "cwd: " << cwd << std::endl;
+        std::cout << "current_path: " << current << std::endl;
         if (access(cwd.c_str(), F_OK) == -1)
         {
-        cwd = *input.begin();                        //if not that maybe its already full path
-        if (access(cwd.c_str(), F_OK) == -1)
-        {
-            sendMsg(501, "Directory doesn't exist"); //if not, its not a directory
-            return;
+            cwd = *input.begin();                        //if not that maybe its already full path
+            if (access(cwd.c_str(), F_OK) == -1)
+            {
+                sendMsg(501, "Directory doesn't exist"); //if not, its not a directory
+                return;
+            }
         }
-    } 
+        this->current_path = cwd;
+        sendMsg(250, this->current_path);
+    }
     else
     {
-        sendMsg(501, "That is the current directory");
-    }  
-}
-    
 
-    this->current_path = cwd;
-
-    sendMsg(250, this->current_path);
+        sendMsg(501, "That is current directory");
+    }
 }
 
 void Request::getcdupHandle()
@@ -278,6 +284,7 @@ void Request::listHandle()
     else
     {
         // listHandle for current directory
+        path = this->current_path;
         status = data.listHandle(origin_path, path);
     }
     if (status = true)
