@@ -84,7 +84,9 @@ private:
         {"LPRT", &Request::unvalidCommand},
         {"LIST", &Request::listHandle},
         {"RETR", &Request::retrHandle},
-        {"QUIT", &Request::quitHandle}};
+        {"ABORT", &Request::quitHandle},
+        {"QUIT", &Request::quitHandle}
+    };
 
     std::vector<std::string> commands = {
         "USER",
@@ -97,6 +99,7 @@ private:
         "LIST",
         "LPRT",
         "SYST",
+        "ABORT",
         "RETR",
         "QUIT"};
 

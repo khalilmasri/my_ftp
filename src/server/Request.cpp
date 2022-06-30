@@ -14,7 +14,7 @@ void Request::handle()
     sendMsg(220);
     setOriginPath();
 
-    this->current_path = ".";
+    this->current_path = this->origin_path;
 
     int ret = 0;
 
@@ -108,8 +108,11 @@ void Request::userHandle()
 }
 void Request::setOriginPath()
 {
-    origin_path = ftp_com.getFilePath();
+    char origin[MAX_PATH];
+    getcwd(origin, 200);
+    origin_path = origin;
     origin_path_size = origin_path.length();
+    LOG_INFO("Origin path => %s Origin path length => %d", origin_path.c_str(), origin_path_size);
 }
 
 std::string Request::getOriginPath()
@@ -176,7 +179,8 @@ void Request::pasvHandle()
 
 void Request::getpwdHandle()
 {
-    sendMsg(250, this->current_path);
+    std::string pwd = "./" + this->current_path.substr(this->origin_path_size+1);
+    sendMsg(250, pwd);
 }
 
 void Request::getcwdHandle()
@@ -203,7 +207,7 @@ void Request::getcwdHandle()
         return;
     }
 
-    cwd = this->origin_path + "/" + (*input.begin());
+    cwd = this->current_path + "/" + (*input.begin());
     res = access(cwd.c_str(), F_OK);
 
     if ( -1 == res)
@@ -212,9 +216,10 @@ void Request::getcwdHandle()
         return;
     }
 
-    this->current_path += "/" + (*input.begin());
+    this->current_path = cwd;
 
-    sendMsg(250, this->current_path);
+    cwd = "./" + this->current_path.substr(this->origin_path_size+1);
+    sendMsg(250, cwd);
 }
 
 void Request::getcdupHandle()
@@ -224,21 +229,21 @@ void Request::getcdupHandle()
 
     int i = cwd.length();
     
-    while (cwd[i] != '\0' && cwd[i] != '/')
+    while (cwd[i] != '/')
     {
         i--;
     }
 
-    cwd[i] = '\0';
+    cwd.resize(i);
 
-    if( i <= 0){
+    if( i < this->origin_path_size){
         sendMsg(501, "Parent directory is not accesssable");
         return;
     }
 
     this->current_path = cwd;
-
-    sendMsg(250, this->current_path);
+    cwd = "." + this->current_path.substr(this->origin_path_size);
+    sendMsg(250, cwd);
 }
 
 void Request::listHandle()
@@ -251,19 +256,20 @@ void Request::listHandle()
     }
 
     std::string path;
-
-    if(input.size() == 1){
-        path = "/" + *input.begin();
+    if( 1 == input.size()){
+        path = this->current_path + "/" + *input.begin();
+    }else if ( 0 == input.size()){
+        path = this->current_path;
     }else{
-        this->current_path
-        path = 
+        sendMsg(500, "LIST FAILED");
     }
+
     sendMsg(150);
 
     bool status = data.listHandle(origin_path, path);
 
     if( true == status){
-        sendMsg(226);
+        sendMsg(226, "Listing directort/file");
     }else{
         sendMsg(500, "LIST FAILED");
     }

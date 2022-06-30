@@ -47,7 +47,7 @@ public:
     ~Data();
 
     int connectData(int, std::string);
-    bool listHandle(std::string);
+    bool listHandle(std::string, std::string);
     bool retrHandle(std::string);
     bool pasvHandle(int, std::string);
 };
