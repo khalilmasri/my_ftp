@@ -179,7 +179,7 @@ void Request::pasvHandle()
 
 void Request::getpwdHandle()
 {
-    std::string pwd = "./" + this->current_path.substr(this->origin_path_size+1);
+    std::string pwd = "." + this->current_path.substr(this->origin_path_size);
     sendMsg(250, pwd);
 }
 
