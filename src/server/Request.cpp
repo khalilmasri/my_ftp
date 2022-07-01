@@ -90,7 +90,7 @@ void Request::userHandle()
         return;
     }
 
-    if (*input.begin() == "anonymous")
+    if (*input.begin() == "Anonymous")
     {
         sendMsg(331);
     }
@@ -129,7 +129,7 @@ void Request::passHandle()
         return;
     }
 
-    if (ftp_com.getUser() == "anonymous")
+    if (ftp_com.getUser() == "Anonymous")
     {
         sendMsg(230);
     }
