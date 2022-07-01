@@ -3,9 +3,7 @@
 
 Data::Data(){}
 
-Data::~Data(){
-    LOG_INFO("Destroying data");
-}
+Data::~Data(){}
 
 int Data::connectData(int data_port, std::string data_ip){
 
@@ -41,6 +39,11 @@ bool Data::pasvHandle(int data_port, std::string filepath){
         return false;
     }
 
+    return true;
+}
+
+bool Data::acceptConnection() {
+
     struct sockaddr_in data_addr;
     socklen_t data_addr_size = sizeof(data_addr);
 
@@ -55,8 +58,8 @@ bool Data::pasvHandle(int data_port, std::string filepath){
     }
 
     return true;
-}
 
+}
 bool Data::listHandle(std::string origin_path, std::string file_path) {
 
 

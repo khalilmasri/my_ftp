@@ -50,6 +50,7 @@ public:
     bool listHandle(std::string, std::string);
     bool retrHandle(std::string);
     bool pasvHandle(int, std::string);
+    bool acceptConnection();
 };
 
 #endif

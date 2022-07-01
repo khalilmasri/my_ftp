@@ -16,7 +16,6 @@ Server& Server::operator = (const Server& rhs){
 }
 
 Server::~Server(){
-    LOG_INFO("Destroying server");
 }
 
 void Server::Start() {

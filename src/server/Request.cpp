@@ -77,8 +77,8 @@ void Request::handleCommand()
         }
     }
 
+    sendMsg(500, *input.begin());
     input.clear();
-    sendMsg(500, "HANDLE_COMMAND() error!");
 }
 
 void Request::userHandle()
@@ -167,10 +167,16 @@ void Request::pasvHandle()
     int data_port = p1 * 256 + p2;
     std::string PASV = server_ip + std::to_string(p1) + "," + std::to_string(p2);
 
-    sendMsg(227, PASV);
     bool status = data.pasvHandle(data_port, this->current_path);
+     if( false == status ){
+        sendMsg(500, "PASV");
+        return;
+    }
 
-    if( false == status ){
+    sendMsg(227, PASV);
+
+    status = data.acceptConnection();
+     if( false == status ){
         sendMsg(500, "PASV");
         return;
     }
